@@ -1,4 +1,11 @@
 .lr-c-global-learning-resources-page__sidebar {
-  width: 20%;
+  box-sizing: border-box;
+  width: 22%;
+  height: 100%;
+  padding: 20px;
   background-color: var(--pf-v5-global--palette--black-100);
+
+  &-input {
+    display: flex;
+  }
 }
