@@ -3,11 +3,15 @@ import GlobalLearningResourcesHeader from './GlobalLearningResourcesHeader';
 import GlobalLearningResourcesTabs from './GlobalLearningResourcesTabs';
 import GlobalLearningResourcesSidebar from './GlobalLearningResourcesSidebar';
 import GlobalLearningResourcesContent from './GlobalLearningResourcesContent';
+import './GlobalLearningResourcesPage.scss';
 
 export const GlobalLearningResourcesPage = () => {
   const [activeTabKey, setActiveTabKey] = useState<number>(0);
 
-  const handleTabSelect = (event: React.MouseEvent<any> | React.KeyboardEvent | MouseEvent, tabIndex: string | number) => {
+  const handleTabSelect = (
+    event: React.MouseEvent<any> | React.KeyboardEvent | MouseEvent,
+    tabIndex: string | number
+  ) => {
     setActiveTabKey(Number(tabIndex));
   };
 
