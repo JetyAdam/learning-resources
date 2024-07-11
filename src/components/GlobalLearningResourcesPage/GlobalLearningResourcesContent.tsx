@@ -1,7 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { Suspense, SyntheticEvent, useEffect, useState } from 'react';
 import { TabContent } from '@patternfly/react-core';
 import './GlobalLearningResourcesContent.scss';
-import useChrome from '@redhat-cloud-services/frontend-components/useChrome';
 import {
   API_BASE,
   FAVORITES,
@@ -28,79 +27,100 @@ import {
   QuickStartTile,
   getQuickStartStatus,
 } from '@patternfly/quickstarts';
+import { BookmarkIcon, OutlinedBookmarkIcon } from '@patternfly/react-icons';
 import axios from 'axios';
+import useAsyncLoader from '../../hooks/useAsyncLoader';
+import { useFlag } from '@unleash/proxy-client-react';
+import toggleFavorite from '../../utils/toggleFavorite';
+
+const OutlinedBookmarkedIcon = () => (
+  <Icon className="lr-c-bookmark__icon">
+    <OutlinedBookmarkIcon />
+  </Icon>
+);
+
+const BookmarkedIcon = () => (
+  <Icon className="lr-c-bookmark__icon">
+    <BookmarkIcon />
+  </Icon>
+);
 
 interface GlobalLearningResourcesContentProps {
   activeTabKey: number;
 }
 
+async function loadQuickstart() {
+  const quickstartsPath = `${API_BASE}/${QUICKSTARTS}`;
+  return axios
+    .get<{ data: { content: QuickStart }[] }>(quickstartsPath)
+    .then(({ data }) => {
+      console.log(data);
+      return data.data.map((data) => data.content);
+    });
+}
+
+const GalleryQuickstart = ({
+  loadQuickstart,
+}: {
+  loadQuickstart: () => QuickStart[] | undefined;
+}) => {
+  const quickstarts = loadQuickstart();
+  const showBookmarks = useFlag('platform.learning-resources.bookmarks');
+
+  return (
+    <Gallery className="lr-c-global-learning-resources-page__content--gallery">
+      {quickstarts?.map((quickStart) => {
+        return (
+          <GalleryItem key={quickStart.metadata.name}>
+            <QuickStartTile
+              action={{
+                'aria-label': quickStart.metadata.favorite
+                  ? `Remove quickstart ${quickStart.spec.displayName} from bookmarks.`
+                  : `Bookmark quickstart ${quickStart.spec.displayName}.`,
+                icon: showBookmarks
+                  ? quickStart.metadata.favorite
+                    ? BookmarkedIcon
+                    : OutlinedBookmarkedIcon
+                  : undefined,
+                onClick: (e: SyntheticEvent<Element, Event>): void => {
+                  if (showBookmarks) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleFavorite(
+                      quickStart.metadata.name,
+                      !quickStart.metadata.favorite
+                    );
+                  }
+                },
+              }}
+              quickStart={{
+                ...quickStart,
+                spec: {
+                  ...quickStart.spec,
+                  icon: null,
+                },
+              }}
+              isActive={true}
+              status={getQuickStartStatus({}, quickStart.metadata.name)}
+            />
+          </GalleryItem>
+        );
+      })}
+    </Gallery>
+  );
+};
+
 const GlobalLearningResourcesContent: React.FC<
   GlobalLearningResourcesContentProps
 > = ({ activeTabKey }) => {
-  const chrome = useChrome();
-  let quickstartsData;
-
-  async function fetchData() {
-    const user = await chrome.auth.getUser();
-    if (!user) {
-      throw new Error('User not logged in');
-    }
-
-    const account = user.identity.internal?.account_id;
-
-    const quickstartsPath = `${API_BASE}/${QUICKSTARTS}`;
-
-    const contentPromise = axios
-      .get<{ data: { content: QuickStart }[] }>(quickstartsPath)
-      .then(({ data }) => {
-        console.log(data);
-        return data;
-      });
-
-    // const favoritesPromise = account
-    //   ? axios
-    //       .get<{ data: FavoriteQuickStart[] }>(
-    //         `${API_BASE}/${FAVORITES}?account=${account}`
-    //       )
-    //       .then(({ data }) => data.data)
-    //   : Promise.resolve<FavoriteQuickStart[]>([]);
-
-    // const promises = [contentPromise, favoritesPromise];
-    // const [, favorites] = await Promise.allSettled(promises);
-    // if (favorites.status === 'fulfilled' && favorites.value) {
-    //   // setFavorites(favorites.value);
-    // }
-
-    // setContentReady(true);
-  }
-
-  useEffect(() => {
-    quickstartsData = fetchData();
-  }, []);
+  const { loader } = useAsyncLoader(loadQuickstart);
 
   return (
     <div className="lr-c-global-learning-resources-page__content">
       <TabContent id="refTabResources" eventKey={0} hidden={activeTabKey !== 0}>
-        <Gallery>
-          {quickstartsData &&
-            quickstartsData?.data.map((quickStart) => {
-              <GalleryItem key={quickStart.metadata.name}>
-                <QuickStartTile
-                  action={undefined}
-                  quickStart={{
-                    ...quickStart,
-                    spec: {
-                      ...quickStart.spec,
-                      // remove any lingering icons
-                      icon: null,
-                    },
-                  }}
-                  isActive={true}
-                  status={getQuickStartStatus({}, quickStart.metadata.name)}
-                />
-              </GalleryItem>;
-            })}
-        </Gallery>
+        <Suspense fallback="Loading">
+          <GalleryQuickstart loadQuickstart={loader} />
+        </Suspense>
       </TabContent>
       <TabContent id="refTabBookmarks" eventKey={1} hidden={activeTabKey !== 1}>
         Tab 2 section DFSFSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
