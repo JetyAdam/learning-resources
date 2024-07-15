@@ -7,6 +7,7 @@ import {
   filterQuickStarts,
 } from '@patternfly/quickstarts';
 import useChrome from '@redhat-cloud-services/frontend-components/useChrome';
+import { ChromeAPI } from '@redhat-cloud-services/types';
 
 export const API_BASE = '/api/quickstarts/v1';
 export const QUICKSTARTS = '/quickstarts';
@@ -107,6 +108,44 @@ const useQuickStarts = (targetBundle?: string) => {
               `${account}`,
               data.data.map(({ content }) => content)
             );
+      });
+
+    const favoritesPromise = account
+      ? axios
+          .get<{ data: FavoriteQuickStart[] }>(
+            `${API_BASE}/${FAVORITES}?account=${account}`
+          )
+          .then(({ data }) => data.data)
+      : Promise.resolve<FavoriteQuickStart[]>([]);
+
+    const promises = [contentPromise, favoritesPromise];
+    const [, favorites] = await Promise.allSettled(promises);
+    if (favorites.status === 'fulfilled' && favorites.value) {
+      setFavorites(favorites.value);
+    }
+
+    const [quickstarts, favorites] = await fetchSuperData(chrome);
+
+    setContentReady(true);
+  }
+
+  async function fetchSuperData(chrome: ChromeAPI) {
+    const user = await chrome.auth.getUser();
+    if (!user) {
+      throw new Error('User not logged in');
+    }
+
+    const account = user.identity.internal?.account_id;
+
+    const quickstartsPath = `${API_BASE}/${QUICKSTARTS}?account=${account}`;
+
+    const contentPromise = axios
+      .get<{ data: { content: QuickStart }[] }>(quickstartsPath)
+      .then(({ data }) => {
+        quickStartsApi.set(
+          `${account}`,
+          data.data.map(({ content }) => content)
+        );
       });
 
     const favoritesPromise = account

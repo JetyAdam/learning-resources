@@ -32,6 +32,9 @@ import axios from 'axios';
 import useAsyncLoader from '../../hooks/useAsyncLoader';
 import { useFlag } from '@unleash/proxy-client-react';
 import toggleFavorite from '../../utils/toggleFavorite';
+import useChrome from '@redhat-cloud-services/frontend-components/useChrome';
+import { ChromeAPI } from '@redhat-cloud-services/types';
+import fetchSuperQuickstarts from '../../utils/fetchQuickstarts';
 
 const OutlinedBookmarkedIcon = () => (
   <Icon className="lr-c-bookmark__icon">
@@ -47,10 +50,13 @@ const BookmarkedIcon = () => (
 
 interface GlobalLearningResourcesContentProps {
   activeTabKey: number;
+  targetBundle: string;
 }
 
-async function loadQuickstart() {
+async function loadQuickstart(getUser: ChromeAPI['auth']['getUser']) {
   const quickstartsPath = `${API_BASE}/${QUICKSTARTS}`;
+  const user = await getUser();
+  // account: user!.identity.internal?.account_id,
   return axios
     .get<{ data: { content: QuickStart }[] }>(quickstartsPath)
     .then(({ data }) => {
@@ -59,12 +65,24 @@ async function loadQuickstart() {
     });
 }
 
-const GalleryQuickstart = ({
-  loadQuickstart,
-}: {
-  loadQuickstart: () => QuickStart[] | undefined;
+interface GalleryQuickstartProps {
+  // loadQuickstart: (
+  //   getUser: ChromeAPI['auth']['getUser']
+  // ) => QuickStart[] | undefined;
+  favorites: FavoriteQuickStart[];
+  setFavorites: (favorites: FavoriteQuickStart[]) => void;
+  targetBundle: string;
+}
+
+const GalleryQuickstart: React.FC<GalleryQuickstartProps> = ({
+  // loadQuickstart,
+  favorites,
+  setFavorites,
+  targetBundle,
 }) => {
-  const quickstarts = loadQuickstart();
+  const chrome = useChrome();
+  // const quickstarts = loadQuickstart(chrome.auth.getUser);
+  const [quickstarts,] = fetchSuperQuickstarts(chrome, targetBundle);
   const showBookmarks = useFlag('platform.learning-resources.bookmarks');
 
   return (
@@ -88,7 +106,10 @@ const GalleryQuickstart = ({
                     e.stopPropagation();
                     toggleFavorite(
                       quickStart.metadata.name,
-                      !quickStart.metadata.favorite
+                      !quickStart.metadata.favorite,
+                      favorites,
+                      setFavorites,
+                      chrome
                     );
                   }
                 },
@@ -112,14 +133,20 @@ const GalleryQuickstart = ({
 
 const GlobalLearningResourcesContent: React.FC<
   GlobalLearningResourcesContentProps
-> = ({ activeTabKey }) => {
-  const { loader } = useAsyncLoader(loadQuickstart);
+> = ({ activeTabKey, targetBundle }) => {
+  // const { loader } = useAsyncLoader(loadQuickstart);
+  const [favorites, setFavorites] = useState<FavoriteQuickStart[]>([]);
 
   return (
     <div className="lr-c-global-learning-resources-page__content">
       <TabContent id="refTabResources" eventKey={0} hidden={activeTabKey !== 0}>
         <Suspense fallback="Loading">
-          <GalleryQuickstart loadQuickstart={loader} />
+          <GalleryQuickstart
+            // loadQuickstart={loader}
+            targetBundle={targetBundle}
+            favorites={favorites}
+            setFavorites={setFavorites}
+          />
         </Suspense>
       </TabContent>
       <TabContent id="refTabBookmarks" eventKey={1} hidden={activeTabKey !== 1}>

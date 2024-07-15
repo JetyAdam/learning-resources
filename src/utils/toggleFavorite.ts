@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 import useChrome from '@redhat-cloud-services/frontend-components/useChrome';
+import { ChromeAPI } from '@redhat-cloud-services/types';
 
 export const API_BASE = '/api/quickstarts/v1';
 export const FAVORITES = '/favorites';
@@ -10,9 +11,13 @@ export type FavoriteQuickStart = {
   quickstartName: string;
 };
 
-async function toggleFavorite(quickstartName: string, favorite: boolean) {
-  const chrome = useChrome();
-  const [favorites, setFavorites] = useState<FavoriteQuickStart[]>([]);
+async function toggleFavorite(
+  quickstartName: string,
+  favorite: boolean,
+  favorites: FavoriteQuickStart[],
+  setFavorites: (favorites: FavoriteQuickStart[]) => void,
+  chrome: ChromeAPI
+) {
   const originalFavorites = [...favorites];
   const newFavorites = favorites.filter(
     (f) => f.quickstartName !== quickstartName
