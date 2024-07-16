@@ -50,7 +50,6 @@ const BookmarkedIcon = () => (
 
 interface GlobalLearningResourcesContentProps {
   activeTabKey: number;
-  targetBundle: string;
 }
 
 async function loadQuickstart(getUser: ChromeAPI['auth']['getUser']) {
@@ -71,19 +70,30 @@ interface GalleryQuickstartProps {
   // ) => QuickStart[] | undefined;
   favorites: FavoriteQuickStart[];
   setFavorites: (favorites: FavoriteQuickStart[]) => void;
-  targetBundle: string;
 }
 
 const GalleryQuickstart: React.FC<GalleryQuickstartProps> = ({
   // loadQuickstart,
   favorites,
   setFavorites,
-  targetBundle,
 }) => {
   const chrome = useChrome();
+  const [quickstarts, setQuickstarts] = useState<QuickStart[]>([]);
   // const quickstarts = loadQuickstart(chrome.auth.getUser);
-  const [quickstarts,] = fetchSuperQuickstarts(chrome, targetBundle);
   const showBookmarks = useFlag('platform.learning-resources.bookmarks');
+
+  useEffect(() => {
+    const loadQuickstarts = async () => {
+      try {
+        const fetchedQuickstarts = await fetchSuperQuickstarts(chrome);
+        setQuickstarts(fetchedQuickstarts);
+      } catch (error) {
+        console.error('Failed to fetch quickstarts', error);
+      }
+    };
+
+    loadQuickstarts();
+  }, [chrome]);
 
   return (
     <Gallery className="lr-c-global-learning-resources-page__content--gallery">
@@ -133,7 +143,7 @@ const GalleryQuickstart: React.FC<GalleryQuickstartProps> = ({
 
 const GlobalLearningResourcesContent: React.FC<
   GlobalLearningResourcesContentProps
-> = ({ activeTabKey, targetBundle }) => {
+> = ({ activeTabKey }) => {
   // const { loader } = useAsyncLoader(loadQuickstart);
   const [favorites, setFavorites] = useState<FavoriteQuickStart[]>([]);
 
@@ -143,7 +153,6 @@ const GlobalLearningResourcesContent: React.FC<
         <Suspense fallback="Loading">
           <GalleryQuickstart
             // loadQuickstart={loader}
-            targetBundle={targetBundle}
             favorites={favorites}
             setFavorites={setFavorites}
           />

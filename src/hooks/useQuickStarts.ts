@@ -124,44 +124,6 @@ const useQuickStarts = (targetBundle?: string) => {
       setFavorites(favorites.value);
     }
 
-    const [quickstarts, favorites] = await fetchSuperData(chrome);
-
-    setContentReady(true);
-  }
-
-  async function fetchSuperData(chrome: ChromeAPI) {
-    const user = await chrome.auth.getUser();
-    if (!user) {
-      throw new Error('User not logged in');
-    }
-
-    const account = user.identity.internal?.account_id;
-
-    const quickstartsPath = `${API_BASE}/${QUICKSTARTS}?account=${account}`;
-
-    const contentPromise = axios
-      .get<{ data: { content: QuickStart }[] }>(quickstartsPath)
-      .then(({ data }) => {
-        quickStartsApi.set(
-          `${account}`,
-          data.data.map(({ content }) => content)
-        );
-      });
-
-    const favoritesPromise = account
-      ? axios
-          .get<{ data: FavoriteQuickStart[] }>(
-            `${API_BASE}/${FAVORITES}?account=${account}`
-          )
-          .then(({ data }) => data.data)
-      : Promise.resolve<FavoriteQuickStart[]>([]);
-
-    const promises = [contentPromise, favoritesPromise];
-    const [, favorites] = await Promise.allSettled(promises);
-    if (favorites.status === 'fulfilled' && favorites.value) {
-      setFavorites(favorites.value);
-    }
-
     setContentReady(true);
   }
 

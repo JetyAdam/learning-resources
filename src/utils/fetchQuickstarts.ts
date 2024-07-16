@@ -20,7 +20,7 @@ import { QuickStart } from '@patternfly/quickstarts';
 //   }
 // });
 
-async function fetchSuperQuickstarts(chrome: ChromeAPI, targetBundle?: string) {
+async function fetchSuperQuickstarts(chrome: ChromeAPI) {
   const user = await chrome.auth.getUser();
   if (!user) {
     throw new Error('User not logged in');
@@ -32,7 +32,7 @@ async function fetchSuperQuickstarts(chrome: ChromeAPI, targetBundle?: string) {
 
   const contentPromise = axios
     .get<{ data: { content: QuickStart }[] }>(quickstartsPath, {
-      params: { account, bundle: targetBundle },
+      params: { account, bundle: 'settings' },
     })
     .then(({ data }) => {
       // `${account}`,
@@ -93,7 +93,7 @@ async function fetchSuperQuickstarts(chrome: ChromeAPI, targetBundle?: string) {
     };
   });
 
-  return [enrichedContent, favorites];
+  return enrichedContent;
 }
 
 export default fetchSuperQuickstarts;
