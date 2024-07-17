@@ -49,9 +49,9 @@ function useAsyncLoader<R, T extends Array<unknown>>(
         storage.current.set(cacheKey, baseCacheValue);
       }
       loaderCache = storage.current.get(cacheKey)!;
-      forceRender();
       loaderCache.promise = asyncMethod(...args)
         .then((res) => {
+          forceRender();
           const loaderCache = storage.current.get(cacheKey);
           if (!loaderCache) {
             throw 'No loader cache';
@@ -76,6 +76,10 @@ function useAsyncLoader<R, T extends Array<unknown>>(
         });
 
       throw loaderCache.promise;
+    },
+    purgeCache: () => {
+      storage.current.clear();
+      forceRender();
     },
   };
 }

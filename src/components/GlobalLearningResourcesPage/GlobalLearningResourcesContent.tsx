@@ -35,107 +35,74 @@ import toggleFavorite from '../../utils/toggleFavorite';
 import useChrome from '@redhat-cloud-services/frontend-components/useChrome';
 import { ChromeAPI } from '@redhat-cloud-services/types';
 import fetchSuperQuickstarts from '../../utils/fetchQuickstarts';
+import GlobalLearningResourcesQuickstartItem from './GlobalLearningResourcesQuickstartItem';
 
-const OutlinedBookmarkedIcon = () => (
-  <Icon className="lr-c-bookmark__icon">
-    <OutlinedBookmarkIcon />
-  </Icon>
-);
-
-const BookmarkedIcon = () => (
-  <Icon className="lr-c-bookmark__icon">
-    <BookmarkIcon />
-  </Icon>
-);
+/**
+ * Optimistic UI
+ * UI se tvari ze vsecny async requesty budou mit 2xx response
+ *
+ * 1. Return z quickstarts map musi byt vlastni komponenta
+ * 2. Ta komponenta musi mit interni state managmeent na favorite, state bude inicializovany z quctsrtas.metadata.favorite
+ * 3. Bude nova async funkce na toggle favorite
+ *   a. jeste pred tim nez se zavolaji async veci (toggle) nastavis novy state likalne pro favorite
+ *   b. "napozadi" po update se zavolaj async veci vcetne purge
+ *   c. kdyz se API call posere, vratis state do puvodniho stavu
+ */
 
 interface GlobalLearningResourcesContentProps {
   activeTabKey: number;
 }
 
-async function loadQuickstart(getUser: ChromeAPI['auth']['getUser']) {
-  const quickstartsPath = `${API_BASE}/${QUICKSTARTS}`;
-  const user = await getUser();
-  // account: user!.identity.internal?.account_id,
-  return axios
-    .get<{ data: { content: QuickStart }[] }>(quickstartsPath)
-    .then(({ data }) => {
-      console.log(data);
-      return data.data.map((data) => data.content);
-    });
-}
-
 interface GalleryQuickstartProps {
-  // loadQuickstart: (
-  //   getUser: ChromeAPI['auth']['getUser']
-  // ) => QuickStart[] | undefined;
+  quickStarts: QuickStart[];
   favorites: FavoriteQuickStart[];
   setFavorites: (favorites: FavoriteQuickStart[]) => void;
+  purgeCache: () => void;
 }
 
 const GalleryQuickstart: React.FC<GalleryQuickstartProps> = ({
-  // loadQuickstart,
+  quickStarts,
   favorites,
   setFavorites,
+  purgeCache,
 }) => {
-  const chrome = useChrome();
-  const [quickstarts, setQuickstarts] = useState<QuickStart[]>([]);
-  // const quickstarts = loadQuickstart(chrome.auth.getUser);
-  const showBookmarks = useFlag('platform.learning-resources.bookmarks');
-
-  useEffect(() => {
-    const loadQuickstarts = async () => {
-      try {
-        const fetchedQuickstarts = await fetchSuperQuickstarts(chrome);
-        setQuickstarts(fetchedQuickstarts);
-      } catch (error) {
-        console.error('Failed to fetch quickstarts', error);
-      }
-    };
-
-    loadQuickstarts();
-  }, [chrome]);
-
   return (
     <Gallery className="lr-c-global-learning-resources-page__content--gallery">
-      {quickstarts?.map((quickStart) => {
+      {quickStarts?.map((quickStart) => {
         return (
-          <GalleryItem key={quickStart.metadata.name}>
-            <QuickStartTile
-              action={{
-                'aria-label': quickStart.metadata.favorite
-                  ? `Remove quickstart ${quickStart.spec.displayName} from bookmarks.`
-                  : `Bookmark quickstart ${quickStart.spec.displayName}.`,
-                icon: showBookmarks
-                  ? quickStart.metadata.favorite
-                    ? BookmarkedIcon
-                    : OutlinedBookmarkedIcon
-                  : undefined,
-                onClick: (e: SyntheticEvent<Element, Event>): void => {
-                  if (showBookmarks) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    toggleFavorite(
-                      quickStart.metadata.name,
-                      !quickStart.metadata.favorite,
-                      favorites,
-                      setFavorites,
-                      chrome
-                    );
-                  }
-                },
-              }}
-              quickStart={{
-                ...quickStart,
-                spec: {
-                  ...quickStart.spec,
-                  icon: null,
-                },
-              }}
-              isActive={true}
-              status={getQuickStartStatus({}, quickStart.metadata.name)}
-            />
-          </GalleryItem>
+          <GlobalLearningResourcesQuickstartItem
+            quickStart={quickStart}
+            purgeCache={purgeCache}
+            favorites={favorites}
+            setFavorites={setFavorites}
+            key={quickStart.metadata.name}
+          />
         );
+      })}
+    </Gallery>
+  );
+};
+
+const GalleryBookmarkedQuickstart: React.FC<GalleryQuickstartProps> = ({
+  quickStarts,
+  favorites,
+  setFavorites,
+  purgeCache,
+}) => {
+  return (
+    <Gallery className="lr-c-global-learning-resources-page__content--gallery">
+      {quickStarts?.map((quickStart) => {
+        if (quickStart.metadata.favorite) {
+          return (
+            <GlobalLearningResourcesQuickstartItem
+              quickStart={quickStart}
+              purgeCache={purgeCache}
+              favorites={favorites}
+              setFavorites={setFavorites}
+              key={quickStart.metadata.name}
+            />
+          );
+        }
       })}
     </Gallery>
   );
@@ -144,25 +111,52 @@ const GalleryQuickstart: React.FC<GalleryQuickstartProps> = ({
 const GlobalLearningResourcesContent: React.FC<
   GlobalLearningResourcesContentProps
 > = ({ activeTabKey }) => {
-  // const { loader } = useAsyncLoader(loadQuickstart);
+  const [quickStarts, setQuickStarts] = useState<QuickStart[]>([]);
+  const { loader, purgeCache } = useAsyncLoader(fetchSuperQuickstarts);
   const [favorites, setFavorites] = useState<FavoriteQuickStart[]>([]);
+  const chrome = useChrome();
 
   return (
     <div className="lr-c-global-learning-resources-page__content">
       <TabContent id="refTabResources" eventKey={0} hidden={activeTabKey !== 0}>
         <Suspense fallback="Loading">
           <GalleryQuickstart
-            // loadQuickstart={loader}
+            quickStarts={quickStarts}
             favorites={favorites}
             setFavorites={setFavorites}
+            purgeCache={purgeCache}
           />
         </Suspense>
       </TabContent>
       <TabContent id="refTabBookmarks" eventKey={1} hidden={activeTabKey !== 1}>
-        Tab 2 section DFSFSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+        <Suspense fallback="Loading">
+          <GalleryBookmarkedQuickstart
+            quickStarts={quickStarts}
+            favorites={favorites}
+            setFavorites={setFavorites}
+            purgeCache={purgeCache}
+          />
+        </Suspense>
       </TabContent>
     </div>
   );
 };
 
 export default GlobalLearningResourcesContent;
+
+// const LoaderReader = ({ loader }) => {
+//   const filters = useFilters();
+//   const data = loader(filters);
+
+//   return <div>{JSON.stringify(data)}</div>;
+// };
+
+// const LoaderRoot = () => {
+//   const { loader, purge } = useAsyncLoader(fetchdata);
+
+//   return (
+//     <Suspense>
+//       <LoaderReader loader={loader} />
+//     </Suspense>
+//   )
+// };

@@ -7,7 +7,6 @@ import {
   filterQuickStarts,
 } from '@patternfly/quickstarts';
 import useChrome from '@redhat-cloud-services/frontend-components/useChrome';
-import { ChromeAPI } from '@redhat-cloud-services/types';
 
 export const API_BASE = '/api/quickstarts/v1';
 export const QUICKSTARTS = '/quickstarts';

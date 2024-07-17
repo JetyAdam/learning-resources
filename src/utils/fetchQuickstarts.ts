@@ -4,23 +4,7 @@ import { QUICKSTARTS } from '../hooks/useQuickStarts';
 import axios from 'axios';
 import { QuickStart } from '@patternfly/quickstarts';
 
-// const fm = favorites.reduce<{ [key: string]: boolean }>((acc, curr) => {
-//   acc[curr.quickstartName] = curr.favorite;
-//   return acc;
-// }, {});
-
-// const foo: QuickStart[] = [
-//   /**SPOUSTA VECOIIII */
-// ];
-
-// foo.forEach((q) => {
-//   const isFavorite = fm[q.metadata.name];
-//   if (isFavorite) {
-//     q.metadata.favorite = true;
-//   }
-// });
-
-async function fetchSuperQuickstarts(chrome: ChromeAPI) {
+async function fetchSuperQuickstarts(chrome: ChromeAPI, bundle?: string) {
   const user = await chrome.auth.getUser();
   if (!user) {
     throw new Error('User not logged in');
@@ -32,7 +16,7 @@ async function fetchSuperQuickstarts(chrome: ChromeAPI) {
 
   const contentPromise = axios
     .get<{ data: { content: QuickStart }[] }>(quickstartsPath, {
-      params: { account, bundle: 'settings' },
+      params: { account, bundle },
     })
     .then(({ data }) => {
       // `${account}`,
@@ -59,41 +43,16 @@ async function fetchSuperQuickstarts(chrome: ChromeAPI) {
     hashMap[item.quickstartName] = item.favorite;
   });
 
-  /**
-   * Content
-   * - pole quickstartu bez informance o favorite
-   * [{
-   *    metadata: {
-   *       name: 'foo',
-   *    },
-   * ....
-   * }]
-   *
-   * hasMape
-   *  - objek kde vis kdery item z content je favorite
-   * {
-   *  'foo': true,
-   *  'bar': false
-   * }
-   *
-   * neco nam chybi
-   * - Content obohaceny o informaci jestli item je favorite nebo ne
-   */
-
-  // v tom contentu musim zmenit data.metadata.favorite podle te hash mapy
-
-  const enrichedContent = content.map((item) => {
+  return content.map((item) => {
     const name = item.metadata.name;
     return {
       ...item,
       metadata: {
         ...item.metadata,
-        favorite: hashMap[name] || false,
+        favorite: !!hashMap[name],
       },
     };
   });
-
-  return enrichedContent;
 }
 
 export default fetchSuperQuickstarts;
