@@ -2,15 +2,14 @@ import React, { SyntheticEvent, useState } from 'react';
 import { useFlag } from '@unleash/proxy-client-react';
 import {
   QuickStart,
-  QuickStartCatalogEmptyState,
   QuickStartTile,
   getQuickStartStatus,
 } from '@patternfly/quickstarts';
 import { GalleryItem, Icon } from '@patternfly/react-core';
-import toggleFavorite from '../../utils/toggleFavorite';
-import { FavoriteQuickStart } from '../../hooks/useQuickStarts';
+import { API_BASE, FAVORITES } from '../../hooks/useQuickStarts';
 import useChrome from '@redhat-cloud-services/frontend-components/useChrome';
 import { BookmarkIcon, OutlinedBookmarkIcon } from '@patternfly/react-icons';
+import axios from 'axios';
 
 const OutlinedBookmarkedIcon = () => (
   <Icon className="lr-c-bookmark__icon">
@@ -27,13 +26,11 @@ const BookmarkedIcon = () => (
 interface GlobalLearningResourcesQuickstartItemProps {
   quickStart: QuickStart;
   purgeCache: () => void;
-  favorites: FavoriteQuickStart[];
-  setFavorites: (favorites: FavoriteQuickStart[]) => void;
 }
 
 const GlobalLearningResourcesQuickstartItem: React.FC<
   GlobalLearningResourcesQuickstartItemProps
-> = ({ quickStart, purgeCache, favorites, setFavorites }) => {
+> = ({ quickStart, purgeCache }) => {
   const chrome = useChrome();
   const showBookmarks = useFlag('platform.learning-resources.bookmarks');
   const [isBookmarked, setIsBookmarked] = useState(
@@ -53,18 +50,23 @@ const GlobalLearningResourcesQuickstartItem: React.FC<
               : OutlinedBookmarkedIcon
             : undefined,
           onClick: async (e: SyntheticEvent<Element, Event>) => {
+            const user = await chrome.auth.getUser();
+            if (!user) {
+              throw new Error('User not logged in');
+            }
+            const account = user.identity.internal?.account_id;
             if (showBookmarks) {
               // djsakkjd
               e.preventDefault();
               e.stopPropagation();
               try {
                 setIsBookmarked((flag: boolean) => !flag);
-                await toggleFavorite(
-                  quickStart.metadata.name,
-                  isBookmarked,
-                  favorites,
-                  setFavorites,
-                  chrome
+                await axios.post(
+                  `${API_BASE}/${FAVORITES}?account=${account}`,
+                  {
+                    quickstartName: quickStart.metadata.name,
+                    favorite: !isBookmarked,
+                  }
                 );
                 purgeCache();
               } catch (error) {

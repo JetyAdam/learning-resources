@@ -37,9 +37,11 @@ function useAsyncLoader<R, T extends Array<unknown>>(
     loader: (...args: Parameters<typeof asyncMethod>) => {
       const cacheKey = getCacheKey(...args);
       let loaderCache = storage.current.get(cacheKey);
-      if (loaderCache?.rejected) return;
+      if (loaderCache?.rejected) {
+        throw 'Error';
+      }
 
-      if (loaderCache?.resolved) return loaderCache.result;
+      if (loaderCache?.resolved) return loaderCache.result!;
 
       if (loaderCache?.promise) {
         throw loaderCache.promise;

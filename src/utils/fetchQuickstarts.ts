@@ -4,8 +4,11 @@ import { QUICKSTARTS } from '../hooks/useQuickStarts';
 import axios from 'axios';
 import { QuickStart } from '@patternfly/quickstarts';
 
-async function fetchSuperQuickstarts(chrome: ChromeAPI, bundle?: string) {
-  const user = await chrome.auth.getUser();
+async function fetchSuperQuickstarts(
+  getUser: ChromeAPI['auth']['getUser'],
+  bundle?: string
+) {
+  const user = await getUser();
   if (!user) {
     throw new Error('User not logged in');
   }
@@ -25,10 +28,9 @@ async function fetchSuperQuickstarts(chrome: ChromeAPI, bundle?: string) {
 
   const favoritesPromise = account
     ? axios
-        .get<{ data: FavoriteQuickStart[] }>(
-          `${API_BASE}/${FAVORITES}?account=${account}`,
-          { params: { account } }
-        )
+        .get<{ data: FavoriteQuickStart[] }>(`${API_BASE}/${FAVORITES}`, {
+          params: { account },
+        })
         .then(({ data }) => data.data)
     : Promise.resolve<FavoriteQuickStart[]>([]);
 

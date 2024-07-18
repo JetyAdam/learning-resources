@@ -37,6 +37,11 @@ import { ChromeAPI } from '@redhat-cloud-services/types';
 import fetchSuperQuickstarts from '../../utils/fetchQuickstarts';
 import GlobalLearningResourcesQuickstartItem from './GlobalLearningResourcesQuickstartItem';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Foobar<AsyncFunc extends (...args: any[]) => Promise<unknown>> = (
+  ...args: Parameters<AsyncFunc>
+) => Awaited<ReturnType<AsyncFunc>>;
+
 /**
  * Optimistic UI
  * UI se tvari ze vsecny async requesty budou mit 2xx response
@@ -51,30 +56,26 @@ import GlobalLearningResourcesQuickstartItem from './GlobalLearningResourcesQuic
 
 interface GlobalLearningResourcesContentProps {
   activeTabKey: number;
+  purgeCache: () => void;
+  loader: Foobar<typeof fetchSuperQuickstarts>;
 }
 
 interface GalleryQuickstartProps {
   quickStarts: QuickStart[];
-  favorites: FavoriteQuickStart[];
-  setFavorites: (favorites: FavoriteQuickStart[]) => void;
   purgeCache: () => void;
 }
 
 const GalleryQuickstart: React.FC<GalleryQuickstartProps> = ({
   quickStarts,
-  favorites,
-  setFavorites,
   purgeCache,
 }) => {
   return (
     <Gallery className="lr-c-global-learning-resources-page__content--gallery">
-      {quickStarts?.map((quickStart) => {
+      {quickStarts.map((quickStart) => {
         return (
           <GlobalLearningResourcesQuickstartItem
             quickStart={quickStart}
             purgeCache={purgeCache}
-            favorites={favorites}
-            setFavorites={setFavorites}
             key={quickStart.metadata.name}
           />
         );
@@ -85,20 +86,16 @@ const GalleryQuickstart: React.FC<GalleryQuickstartProps> = ({
 
 const GalleryBookmarkedQuickstart: React.FC<GalleryQuickstartProps> = ({
   quickStarts,
-  favorites,
-  setFavorites,
   purgeCache,
 }) => {
   return (
     <Gallery className="lr-c-global-learning-resources-page__content--gallery">
-      {quickStarts?.map((quickStart) => {
+      {quickStarts.map((quickStart) => {
         if (quickStart.metadata.favorite) {
           return (
             <GlobalLearningResourcesQuickstartItem
               quickStart={quickStart}
               purgeCache={purgeCache}
-              favorites={favorites}
-              setFavorites={setFavorites}
               key={quickStart.metadata.name}
             />
           );
@@ -110,33 +107,34 @@ const GalleryBookmarkedQuickstart: React.FC<GalleryQuickstartProps> = ({
 
 const GlobalLearningResourcesContent: React.FC<
   GlobalLearningResourcesContentProps
-> = ({ activeTabKey }) => {
-  const [quickStarts, setQuickStarts] = useState<QuickStart[]>([]);
-  const { loader, purgeCache } = useAsyncLoader(fetchSuperQuickstarts);
-  const [favorites, setFavorites] = useState<FavoriteQuickStart[]>([]);
+> = ({ activeTabKey, loader, purgeCache }) => {
+  // const { loader, purgeCache } = useAsyncLoader(fetchSuperQuickstarts);
+  // const [favorites, setFavorites] = useState<FavoriteQuickStart[]>([]);
   const chrome = useChrome();
+
+  const quickStarts = loader(chrome.auth.getUser);
 
   return (
     <div className="lr-c-global-learning-resources-page__content">
       <TabContent id="refTabResources" eventKey={0} hidden={activeTabKey !== 0}>
-        <Suspense fallback="Loading">
-          <GalleryQuickstart
-            quickStarts={quickStarts}
-            favorites={favorites}
-            setFavorites={setFavorites}
-            purgeCache={purgeCache}
-          />
-        </Suspense>
+        {/* <Suspense fallback="Loading"> */}
+        <GalleryQuickstart
+          quickStarts={quickStarts}
+          // favorites={favorites}
+          // setFavorites={setFavorites}
+          purgeCache={purgeCache}
+        />
+        {/* </Suspense> */}
       </TabContent>
       <TabContent id="refTabBookmarks" eventKey={1} hidden={activeTabKey !== 1}>
-        <Suspense fallback="Loading">
-          <GalleryBookmarkedQuickstart
-            quickStarts={quickStarts}
-            favorites={favorites}
-            setFavorites={setFavorites}
-            purgeCache={purgeCache}
-          />
-        </Suspense>
+        {/* <Suspense fallback="Loading"> */}
+        <GalleryBookmarkedQuickstart
+          quickStarts={quickStarts}
+          // favorites={favorites}
+          // setFavorites={setFavorites}
+          purgeCache={purgeCache}
+        />
+        {/* </Suspense> */}
       </TabContent>
     </div>
   );
