@@ -1,8 +1,15 @@
-import React, { useEffect } from 'react';
-import { Tab, TabTitleText, Tabs, TabsProps } from '@patternfly/react-core';
+import React, { useState } from 'react';
+import {
+  Spinner,
+  Tab,
+  TabTitleText,
+  Tabs,
+  TabsProps,
+} from '@patternfly/react-core';
 import './GlobalLearningResourcesTabs.scss';
 import fetchSuperQuickstarts from '../../utils/fetchQuickstarts';
 import useChrome from '@redhat-cloud-services/frontend-components/useChrome';
+import { QuickStart } from '@patternfly/quickstarts';
 
 type Foobar<AsyncFunc extends (...args: any[]) => Promise<unknown>> = (
   ...args: Parameters<AsyncFunc>
@@ -11,16 +18,14 @@ type Foobar<AsyncFunc extends (...args: any[]) => Promise<unknown>> = (
 interface GlobalLearningResourcesTabsProps {
   activeTabKey: number | string;
   onSelect: TabsProps['onSelect'];
-  loader: Foobar<typeof fetchSuperQuickstarts>;
-  purgeCache: () => void;
+  loader?: Foobar<typeof fetchSuperQuickstarts>;
 }
 
 const GlobalLearningResourcesTabs: React.FC<
   GlobalLearningResourcesTabsProps
 > = ({ activeTabKey, onSelect, loader }) => {
-  // loader call
   const chrome = useChrome();
-  const quickStarts = loader(chrome.auth.getUser);
+  const quickStarts: QuickStart[] = loader?.(chrome.auth.getUser) ?? [];
 
   const bookmarkedResourcesCount = quickStarts.reduce(
     (acc, cur) => (cur.metadata.favorite ? acc + 1 : acc),
@@ -39,7 +44,8 @@ const GlobalLearningResourcesTabs: React.FC<
         eventKey={0}
         title={
           <TabTitleText>
-            All learning resources ({quickStarts.length})
+            All learning resources (
+            {!loader ? <Spinner size="md" /> : quickStarts.length})
           </TabTitleText>
         }
         tabContentId="refTabResources"
@@ -48,7 +54,8 @@ const GlobalLearningResourcesTabs: React.FC<
         eventKey={1}
         title={
           <TabTitleText>
-            My bookmarked resources ({bookmarkedResourcesCount})
+            My bookmarked resources (
+            {!loader ? <Spinner size="md" /> : bookmarkedResourcesCount})
           </TabTitleText>
         }
         tabContentId="refTabBookmarks"

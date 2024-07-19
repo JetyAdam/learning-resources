@@ -1,4 +1,4 @@
-import React, { Suspense, useRef, useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import GlobalLearningResourcesHeader from './GlobalLearningResourcesHeader';
 import GlobalLearningResourcesTabs from './GlobalLearningResourcesTabs';
 import GlobalLearningResourcesSidebar from './GlobalLearningResourcesSidebar';
@@ -22,12 +22,18 @@ export const GlobalLearningResourcesPage = () => {
     <div className="lr-c-global-learning-resources-page">
       <div className="lr-c-global-learning-resources-page__top-container">
         <GlobalLearningResourcesHeader />
-        <Suspense fallback={<div>Loading tabs...</div>}>
+        <Suspense
+          fallback={
+            <GlobalLearningResourcesTabs
+              activeTabKey={activeTabKey}
+              onSelect={handleTabSelect}
+            />
+          }
+        >
           <GlobalLearningResourcesTabs
             activeTabKey={activeTabKey}
             onSelect={handleTabSelect}
             loader={loader}
-            purgeCache={purgeCache}
           />
         </Suspense>
       </div>
