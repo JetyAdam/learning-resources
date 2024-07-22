@@ -39,53 +39,56 @@ const GlobalLearningResourcesQuickstartItem: React.FC<
 
   return (
     <GalleryItem key={quickStart.metadata.name}>
-      <QuickStartTile
-        action={{
-          'aria-label': isBookmarked
-            ? `Remove quickstart ${quickStart.spec.displayName} from bookmarks.`
-            : `Bookmark quickstart ${quickStart.spec.displayName}.`,
-          icon: showBookmarks
-            ? isBookmarked
-              ? BookmarkedIcon
-              : OutlinedBookmarkedIcon
-            : undefined,
-          onClick: async (e: SyntheticEvent<Element, Event>) => {
-            const user = await chrome.auth.getUser();
-            if (!user) {
-              throw new Error('User not logged in');
-            }
-            const account = user.identity.internal?.account_id;
-            if (showBookmarks) {
-              // djsakkjd
-              e.preventDefault();
-              e.stopPropagation();
-              try {
-                setIsBookmarked((flag: boolean) => !flag);
-                await axios.post(
-                  `${API_BASE}/${FAVORITES}?account=${account}`,
-                  {
-                    quickstartName: quickStart.metadata.name,
-                    favorite: !isBookmarked,
-                  }
-                );
-                purgeCache();
-              } catch (error) {
-                console.log(error);
-                setIsBookmarked(quickStart.metadata.favorite);
+      <div style={{ height: '500px' }}>
+        <QuickStartTile
+          action={{
+            'aria-label': isBookmarked
+              ? `Remove quickstart ${quickStart.spec.displayName} from bookmarks.`
+              : `Bookmark quickstart ${quickStart.spec.displayName}.`,
+            icon: showBookmarks
+              ? isBookmarked
+                ? BookmarkedIcon
+                : OutlinedBookmarkedIcon
+              : undefined,
+            onClick: async (e: SyntheticEvent<Element, Event>) => {
+              const user = await chrome.auth.getUser();
+              if (!user) {
+                throw new Error('User not logged in');
               }
-            }
-          },
-        }}
-        quickStart={{
-          ...quickStart,
-          spec: {
-            ...quickStart.spec,
-            icon: null,
-          },
-        }}
-        isActive={true}
-        status={getQuickStartStatus({}, quickStart.metadata.name)}
-      />
+              const account = user.identity.internal?.account_id;
+              if (showBookmarks) {
+                // djsakkjd
+                e.preventDefault();
+                e.stopPropagation();
+                try {
+                  setIsBookmarked((flag: boolean) => !flag);
+                  await axios.post(
+                    `${API_BASE}/${FAVORITES}?account=${account}`,
+                    {
+                      quickstartName: quickStart.metadata.name,
+                      favorite: !isBookmarked,
+                    }
+                  );
+                  purgeCache();
+                } catch (error) {
+                  console.log(error);
+                  setIsBookmarked(quickStart.metadata.favorite);
+                }
+              }
+            },
+          }}
+          quickStart={{
+            ...quickStart,
+            spec: {
+              ...quickStart.spec,
+              icon: `/apps/frontend-assets/src/console-landing
+            /ansible.svg`,
+            },
+          }}
+          isActive={true}
+          status={getQuickStartStatus({}, quickStart.metadata.name)}
+        />
+      </div>
     </GalleryItem>
   );
 };

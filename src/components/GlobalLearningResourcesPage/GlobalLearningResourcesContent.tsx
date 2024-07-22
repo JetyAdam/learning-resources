@@ -1,39 +1,19 @@
-import React, { Suspense, SyntheticEvent, useEffect, useState } from 'react';
+import React from 'react';
 import { TabContent } from '@patternfly/react-core';
 import './GlobalLearningResourcesContent.scss';
-import {
-  API_BASE,
-  FAVORITES,
-  FavoriteQuickStart,
-  QUICKSTARTS,
-} from '../../hooks/useQuickStarts';
-import {
-  Badge,
-  Button,
-  ExpandableSection,
-  Flex,
-  FlexItem,
-  Gallery,
-  GalleryItem,
-  Icon,
-  Split,
-  SplitItem,
-  Text,
-  TextContent,
-  Title,
-} from '@patternfly/react-core';
-import {
-  QuickStart,
-  QuickStartTile,
-  getQuickStartStatus,
-} from '@patternfly/quickstarts';
-import { BookmarkIcon, OutlinedBookmarkIcon } from '@patternfly/react-icons';
-import axios from 'axios';
-import useAsyncLoader from '../../hooks/useAsyncLoader';
-import { useFlag } from '@unleash/proxy-client-react';
-import toggleFavorite from '../../utils/toggleFavorite';
+import { Bullseye, Gallery } from '@patternfly/react-core';
+import { QuickStart } from '@patternfly/quickstarts';
 import useChrome from '@redhat-cloud-services/frontend-components/useChrome';
-import { ChromeAPI } from '@redhat-cloud-services/types';
+import {
+  Button,
+  EmptyState,
+  EmptyStateActions,
+  EmptyStateBody,
+  EmptyStateFooter,
+  EmptyStateHeader,
+  EmptyStateIcon,
+} from '@patternfly/react-core';
+import CubesIcon from '@patternfly/react-icons/dist/esm/icons/cubes-icon';
 import fetchSuperQuickstarts from '../../utils/fetchQuickstarts';
 import GlobalLearningResourcesQuickstartItem from './GlobalLearningResourcesQuickstartItem';
 
@@ -88,6 +68,35 @@ const GalleryBookmarkedQuickstart: React.FC<GalleryQuickstartProps> = ({
   quickStarts,
   purgeCache,
 }) => {
+  const bookmarkedItemsCount = quickStarts.reduce(
+    (acc, quickStart) => (quickStart.metadata.favorite ? acc + 1 : acc),
+    0
+  );
+  if (bookmarkedItemsCount === 0) {
+    return (
+      <Bullseye>
+        <EmptyState className="lr-c-global-learning-resources-page__content--empty">
+          <EmptyStateHeader
+            titleText="No resources bookmarked"
+            headingLevel="h4"
+            icon={<EmptyStateIcon icon={CubesIcon} />}
+          />
+          <EmptyStateBody>
+            You don&apos;t have any bookmarked learning resources. Click the
+            icon in cards on the &apos;All learning resources&apos; tab to
+            bookmark a resource.
+          </EmptyStateBody>
+          <EmptyStateFooter>
+            <EmptyStateActions>
+              <Button variant="link">
+                Go to the &apos;All learning resources&apos; tab
+              </Button>
+            </EmptyStateActions>
+          </EmptyStateFooter>
+        </EmptyState>
+      </Bullseye>
+    );
+  }
   return (
     <Gallery className="lr-c-global-learning-resources-page__content--gallery">
       {quickStarts.map((quickStart) => {
