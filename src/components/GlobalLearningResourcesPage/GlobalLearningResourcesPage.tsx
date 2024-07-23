@@ -8,33 +8,14 @@ import useAsyncLoader from '../../hooks/useAsyncLoader';
 import fetchSuperQuickstarts from '../../utils/fetchQuickstarts';
 
 export const GlobalLearningResourcesPage = () => {
-  const [activeTabKey, setActiveTabKey] = useState<number>(0);
-
-  const handleTabSelect = (
-    event: React.MouseEvent<any> | React.KeyboardEvent | MouseEvent,
-    tabIndex: string | number
-  ) => {
-    setActiveTabKey(Number(tabIndex));
-  };
   const { loader, purgeCache } = useAsyncLoader(fetchSuperQuickstarts);
 
   return (
     <div className="lr-c-global-learning-resources-page">
       <div className="lr-c-global-learning-resources-page__top-container">
         <GlobalLearningResourcesHeader />
-        <Suspense
-          fallback={
-            <GlobalLearningResourcesTabs
-              activeTabKey={activeTabKey}
-              onSelect={handleTabSelect}
-            />
-          }
-        >
-          <GlobalLearningResourcesTabs
-            activeTabKey={activeTabKey}
-            onSelect={handleTabSelect}
-            loader={loader}
-          />
+        <Suspense fallback={<GlobalLearningResourcesTabs />}>
+          <GlobalLearningResourcesTabs loader={loader} />
         </Suspense>
       </div>
       <div className="lr-c-global-learning-resources-page__main">
@@ -42,7 +23,6 @@ export const GlobalLearningResourcesPage = () => {
         {/* chybi suspense */}
         <Suspense fallback={<div>Loading Content...</div>}>
           <GlobalLearningResourcesContent
-            activeTabKey={activeTabKey}
             loader={loader}
             purgeCache={purgeCache}
           />

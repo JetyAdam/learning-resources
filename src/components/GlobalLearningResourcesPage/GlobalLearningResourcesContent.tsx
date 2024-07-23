@@ -16,6 +16,7 @@ import {
 import CubesIcon from '@patternfly/react-icons/dist/esm/icons/cubes-icon';
 import fetchSuperQuickstarts from '../../utils/fetchQuickstarts';
 import GlobalLearningResourcesQuickstartItem from './GlobalLearningResourcesQuickstartItem';
+import { useSearchParams } from 'react-router-dom';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Foobar<AsyncFunc extends (...args: any[]) => Promise<unknown>> = (
@@ -35,7 +36,6 @@ type Foobar<AsyncFunc extends (...args: any[]) => Promise<unknown>> = (
  */
 
 interface GlobalLearningResourcesContentProps {
-  activeTabKey: number;
   purgeCache: () => void;
   loader: Foobar<typeof fetchSuperQuickstarts>;
 }
@@ -116,54 +116,36 @@ const GalleryBookmarkedQuickstart: React.FC<GalleryQuickstartProps> = ({
 
 const GlobalLearningResourcesContent: React.FC<
   GlobalLearningResourcesContentProps
-> = ({ activeTabKey, loader, purgeCache }) => {
-  // const { loader, purgeCache } = useAsyncLoader(fetchSuperQuickstarts);
-  // const [favorites, setFavorites] = useState<FavoriteQuickStart[]>([]);
+> = ({ loader, purgeCache }) => {
   const chrome = useChrome();
+  // search params
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const quickStarts = loader(chrome.auth.getUser);
 
   return (
     <div className="lr-c-global-learning-resources-page__content">
-      <TabContent id="refTabResources" eventKey={0} hidden={activeTabKey !== 0}>
-        {/* <Suspense fallback="Loading"> */}
-        <GalleryQuickstart
-          quickStarts={quickStarts}
-          // favorites={favorites}
-          // setFavorites={setFavorites}
-          purgeCache={purgeCache}
-        />
-        {/* </Suspense> */}
+      <TabContent
+        id="refTabResources"
+        onClick={() => setSearchParams({ tab: '0' })}
+        eventKey={0}
+        hidden={searchParams.get('tab') !== '0'}
+      >
+        <GalleryQuickstart quickStarts={quickStarts} purgeCache={purgeCache} />
       </TabContent>
-      <TabContent id="refTabBookmarks" eventKey={1} hidden={activeTabKey !== 1}>
-        {/* <Suspense fallback="Loading"> */}
+      <TabContent
+        id="refTabBookmarks"
+        onClick={() => setSearchParams({ tab: '0' })}
+        eventKey={1}
+        hidden={searchParams.get('tab') !== '1'}
+      >
         <GalleryBookmarkedQuickstart
           quickStarts={quickStarts}
-          // favorites={favorites}
-          // setFavorites={setFavorites}
           purgeCache={purgeCache}
         />
-        {/* </Suspense> */}
       </TabContent>
     </div>
   );
 };
 
 export default GlobalLearningResourcesContent;
-
-// const LoaderReader = ({ loader }) => {
-//   const filters = useFilters();
-//   const data = loader(filters);
-
-//   return <div>{JSON.stringify(data)}</div>;
-// };
-
-// const LoaderRoot = () => {
-//   const { loader, purge } = useAsyncLoader(fetchdata);
-
-//   return (
-//     <Suspense>
-//       <LoaderReader loader={loader} />
-//     </Suspense>
-//   )
-// };

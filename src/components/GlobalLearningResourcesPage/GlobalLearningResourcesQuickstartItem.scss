@@ -1,0 +1,23 @@
+.lr-c-global-learning-resources-quickstart__card {
+
+  &--title {
+    
+    &-span {
+      color: var(--pf-global--Color--200);
+    }
+  }
+
+  &--body {
+  
+    &-name {
+      color: var(--pf-global--Color--100);
+      font-size: 14px;
+      line-height: 1.3;
+    }
+
+    &-description {
+      color: var(--pf-global--Color--100);
+      line-height: 1.3;
+    }
+  }
+}

@@ -1,11 +1,5 @@
-import React, { useEffect } from 'react';
-import {
-  Spinner,
-  Tab,
-  TabTitleText,
-  Tabs,
-  TabsProps,
-} from '@patternfly/react-core';
+import React from 'react';
+import { Spinner, Tab, TabTitleText, Tabs } from '@patternfly/react-core';
 import './GlobalLearningResourcesTabs.scss';
 import fetchSuperQuickstarts from '../../utils/fetchQuickstarts';
 import useChrome from '@redhat-cloud-services/frontend-components/useChrome';
@@ -18,15 +12,13 @@ type Foobar<AsyncFunc extends (...args: any[]) => Promise<unknown>> = (
 ) => Awaited<ReturnType<AsyncFunc>>;
 
 interface GlobalLearningResourcesTabsProps {
-  activeTabKey: number | string;
-  onSelect: TabsProps['onSelect'];
   loader?: Foobar<typeof fetchSuperQuickstarts>;
 }
 
 const GlobalLearningResourcesTabs: React.FC<
   GlobalLearningResourcesTabsProps
-> = ({ activeTabKey, onSelect, loader }) => {
-  const [searchParams, setSearchParams] = useSearchParams();
+> = ({ loader }) => {
+  const [searchParams] = useSearchParams();
   const chrome = useChrome();
   const quickStarts: QuickStart[] = loader?.(chrome.auth.getUser) ?? [];
 
@@ -35,39 +27,24 @@ const GlobalLearningResourcesTabs: React.FC<
     0
   );
 
-  useEffect(() => {
-    const tabFromUrl = searchParams.get('tab');
-    if (tabFromUrl) {
-      onSelect(null, parseInt(tabFromUrl, 10));
-    }
-  }, [searchParams, onSelect]);
-
-  const handleTabSelect = (
-    event: React.MouseEvent<HTMLElement, MouseEvent>,
-    eventKey: number
-  ) => {
-    setSearchParams({ tab: eventKey.toString() });
-    onSelect(event, eventKey);
-  };
-
   return (
     <Tabs
-      activeKey={activeTabKey}
-      onSelect={handleTabSelect}
       aria-label="Tabs in the separate content example"
       role="region"
       className="lr-c-global-learning-resources-tabs"
+      activeKey={searchParams.get('tab')!}
     >
       <Tab
-        eventKey={0}
+        eventKey="0"
         title={
           <Link
+            className="lr-c-global-learning-resources-tabs__link"
             to={{
               pathname: '.',
               search: `?tab=0`,
             }}
           >
-            <TabTitleText>
+            <TabTitleText className="lr-c-global-learning-resources-tabs__title">
               All learning resources (
               {!loader ? <Spinner size="md" /> : quickStarts.length})
             </TabTitleText>
@@ -76,15 +53,16 @@ const GlobalLearningResourcesTabs: React.FC<
         tabContentId="refTabResources"
       />
       <Tab
-        eventKey={1}
+        eventKey="1"
         title={
           <Link
+            className="lr-c-global-learning-resources-tabs__link"
             to={{
               pathname: '.',
               search: `?tab=1`,
             }}
           >
-            <TabTitleText>
+            <TabTitleText className="lr-c-global-learning-resources-tabs__title">
               My bookmarked resources (
               {!loader ? <Spinner size="md" /> : bookmarkedResourcesCount})
             </TabTitleText>
