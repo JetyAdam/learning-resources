@@ -2,13 +2,15 @@ import React from 'react';
 import './GlobalLearningResourcesSidebar.scss';
 import GlobalLearningResourcesInput from './GlobalLearningResourcesInput';
 import GlobalLearningResourcesFilters from './GlobalLearningResourcesFilters';
+import { Stack } from '@patternfly/react-core';
 
 export const GlobalLearningResourcesSidebar = () => {
   return (
-    <div className="lr-c-global-learning-resources-page__sidebar">
+    <Stack
+     className="lr-c-global-learning-resources-page__sidebar">
       <GlobalLearningResourcesInput />
       <GlobalLearningResourcesFilters />
-    </div>
+    </Stack>
   );
 };
 

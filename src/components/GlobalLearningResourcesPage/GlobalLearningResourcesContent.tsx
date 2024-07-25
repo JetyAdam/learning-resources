@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { TabContent } from '@patternfly/react-core';
 import './GlobalLearningResourcesContent.scss';
 import { Bullseye, Gallery } from '@patternfly/react-core';
@@ -53,11 +53,13 @@ const GalleryQuickstart: React.FC<GalleryQuickstartProps> = ({
     <Gallery className="lr-c-global-learning-resources-page__content--gallery">
       {quickStarts.map((quickStart) => {
         return (
+          <div className="lr-c-global-learning-resources-page__content--gallery-card-wrapper">
           <GlobalLearningResourcesQuickstartItem
             quickStart={quickStart}
             purgeCache={purgeCache}
             key={quickStart.metadata.name}
           />
+          </div>
         );
       })}
     </Gallery>
@@ -102,11 +104,13 @@ const GalleryBookmarkedQuickstart: React.FC<GalleryQuickstartProps> = ({
       {quickStarts.map((quickStart) => {
         if (quickStart.metadata.favorite) {
           return (
+            <div className="lr-c-global-learning-resources-page__content--gallery-card-wrapper">
             <GlobalLearningResourcesQuickstartItem
               quickStart={quickStart}
               purgeCache={purgeCache}
               key={quickStart.metadata.name}
             />
+            </div>
           );
         }
       })}
@@ -121,23 +125,23 @@ const GlobalLearningResourcesContent: React.FC<
   // search params
   const [searchParams, setSearchParams] = useSearchParams();
 
+  useEffect(() => {
+    setSearchParams({ tab: 'all' });
+  }, []);
+
   const quickStarts = loader(chrome.auth.getUser);
 
   return (
     <div className="lr-c-global-learning-resources-page__content">
       <TabContent
         id="refTabResources"
-        onClick={() => setSearchParams({ tab: '0' })}
-        eventKey={0}
-        hidden={searchParams.get('tab') !== '0'}
+        hidden={searchParams.get('tab') !== 'all'}
       >
         <GalleryQuickstart quickStarts={quickStarts} purgeCache={purgeCache} />
       </TabContent>
       <TabContent
         id="refTabBookmarks"
-        onClick={() => setSearchParams({ tab: '0' })}
-        eventKey={1}
-        hidden={searchParams.get('tab') !== '1'}
+        hidden={searchParams.get('tab') !== 'bookmarks'}
       >
         <GalleryBookmarkedQuickstart
           quickStarts={quickStarts}

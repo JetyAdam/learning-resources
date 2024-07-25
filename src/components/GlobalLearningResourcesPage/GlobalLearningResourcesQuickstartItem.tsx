@@ -2,6 +2,7 @@ import React, { SyntheticEvent, useState } from 'react';
 import { useFlag } from '@unleash/proxy-client-react';
 import { QuickStart } from '@patternfly/quickstarts';
 import {
+  Button,
   Card,
   CardBody,
   CardFooter,
@@ -22,18 +23,7 @@ import useChrome from '@redhat-cloud-services/frontend-components/useChrome';
 import { BookmarkIcon, OutlinedBookmarkIcon } from '@patternfly/react-icons';
 import axios from 'axios';
 import './GlobalLearningResourcesQuickstartItem.scss';
-
-const OutlinedBookmarkedIcon = () => (
-  <Icon className="lr-c-global-learning-resources-quickstart__card--bookmark">
-    <OutlinedBookmarkIcon />
-  </Icon>
-);
-
-const BookmarkedIcon = () => (
-  <Icon className="lr-c-global-learning-resources-quickstart__card--bookmark-filled">
-    <BookmarkIcon />
-  </Icon>
-);
+import { BookmarkedIcon, OutlinedBookmarkedIcon } from '../common/BookmarkIcon';
 
 interface GlobalLearningResourcesQuickstartItemProps {
   quickStart: QuickStart;
@@ -52,7 +42,34 @@ const GlobalLearningResourcesQuickstartItem: React.FC<
   const quickStartURL = new URL(
     quickStart.spec.link?.href ?? 'https://access.redhat.com/'
   );
+  const labelColor = quickStart.spec.type?.color;
 
+  const handleBookmark = async (e: SyntheticEvent<Element, Event>) => {
+    const user = await chrome.auth.getUser();
+    if (!user) {
+      throw new Error('User not logged in');
+    }
+    const account = user.identity.internal?.account_id;
+    if (showBookmarks) {
+      e.preventDefault();
+      e.stopPropagation();
+      try {
+        setIsBookmarked((flag: boolean) => !flag);
+        await axios.post(
+          `${API_BASE}/${FAVORITES}?account=${account}`,
+          {
+            quickstartName: quickStart.metadata.name,
+            favorite: !isBookmarked,
+          }
+        );
+        purgeCache();
+      } catch (error) {
+        console.log(error);
+        setIsBookmarked(quickStart.metadata.favorite);
+      }
+    }
+  };
+  
   return (
     <GalleryItem key={quickStart.metadata.name}>
       <Card className="lr-c-global-learning-resources-quickstart__card">
@@ -61,7 +78,7 @@ const GlobalLearningResourcesQuickstartItem: React.FC<
             component="div"
             className="lr-c-global-learning-resources-quickstart__card--title"
           >
-            <Flex>
+            <div className='lr-c-global-learning-resources-quickstart__card--title-container'>
               <img
                 className="lr-c-global-learning-resources-quickstart__card--title-icon"
                 src="/apps/frontend-assets/console-landing/ansible.svg"
@@ -69,7 +86,7 @@ const GlobalLearningResourcesQuickstartItem: React.FC<
               />
               <Stack hasGutter={false}>
                 <StackItem>
-                  <Label isCompact color="orange">
+                  <Label isCompact color={labelColor}>
                     {quickStart.spec.type?.text}
                   </Label>
                 </StackItem>
@@ -79,8 +96,10 @@ const GlobalLearningResourcesQuickstartItem: React.FC<
                   </Text>
                 </StackItem>
               </Stack>
-            </Flex>
-            <OutlinedBookmarkIcon />
+            </div>
+            <Button onClick={handleBookmark} variant="plain" aria-label={ quickStart.metadata.favorite ? "Unbookmark learning resource" : "Bookmark learning resource"}>
+            { isBookmarked ? <BookmarkedIcon /> : <OutlinedBookmarkedIcon /> }
+            </Button>
           </CardTitle>
           <CardBody component="div">
             <Text component={TextVariants.h3}>
@@ -105,32 +124,7 @@ const GlobalLearningResourcesQuickstartItem: React.FC<
               ? BookmarkedIcon
               : OutlinedBookmarkedIcon
             : undefined,
-          onClick: async (e: SyntheticEvent<Element, Event>) => {
-            const user = await chrome.auth.getUser();
-            if (!user) {
-              throw new Error('User not logged in');
-            }
-            const account = user.identity.internal?.account_id;
-            if (showBookmarks) {
-              // djsakkjd
-              e.preventDefault();
-              e.stopPropagation();
-              try {
-                setIsBookmarked((flag: boolean) => !flag);
-                await axios.post(
-                  `${API_BASE}/${FAVORITES}?account=${account}`,
-                  {
-                    quickstartName: quickStart.metadata.name,
-                    favorite: !isBookmarked,
-                  }
-                );
-                purgeCache();
-              } catch (error) {
-                console.log(error);
-                setIsBookmarked(quickStart.metadata.favorite);
-              }
-            }
-          },
+          onClick: ,
         }}
         quickStart={{
           ...quickStart,

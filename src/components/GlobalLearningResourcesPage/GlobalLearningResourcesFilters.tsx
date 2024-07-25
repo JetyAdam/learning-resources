@@ -1,10 +1,10 @@
 import React from 'react';
 import './GlobalLearningResourcesFilters.scss';
-import { Checkbox } from '@patternfly/react-core';
+import { Stack, StackItem, Checkbox } from '@patternfly/react-core';
 
 export const GlobalLearningResourcesFilters = () => {
   return (
-    <div className="lr-c-global-learning-resources-page__filters">
+    <Stack className="lr-c-global-learning-resources-page__filters">
       <h3>Product families</h3>
       <div className="lr-c-global-learning-resources-page__filters-container">
         <span>Platforms</span>
@@ -68,7 +68,7 @@ export const GlobalLearningResourcesFilters = () => {
         <Checkbox label="Spend management" id="spend-management" />
         <Checkbox label="System configuration" id="system-configuration" />
       </div>
-    </div>
+    </Stack>
   );
 };
 

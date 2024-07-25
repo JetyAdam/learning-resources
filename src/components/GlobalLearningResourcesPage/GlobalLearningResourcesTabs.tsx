@@ -35,13 +35,13 @@ const GlobalLearningResourcesTabs: React.FC<
       activeKey={searchParams.get('tab')!}
     >
       <Tab
-        eventKey="0"
+        eventKey="all"
         title={
           <Link
             className="lr-c-global-learning-resources-tabs__link"
             to={{
               pathname: '.',
-              search: `?tab=0`,
+              search: `?tab=all`,
             }}
           >
             <TabTitleText className="lr-c-global-learning-resources-tabs__title">
@@ -53,13 +53,13 @@ const GlobalLearningResourcesTabs: React.FC<
         tabContentId="refTabResources"
       />
       <Tab
-        eventKey="1"
+        eventKey="bookmarks"
         title={
           <Link
             className="lr-c-global-learning-resources-tabs__link"
             to={{
               pathname: '.',
-              search: `?tab=1`,
+              search: `?tab=bookmarks`,
             }}
           >
             <TabTitleText className="lr-c-global-learning-resources-tabs__title">

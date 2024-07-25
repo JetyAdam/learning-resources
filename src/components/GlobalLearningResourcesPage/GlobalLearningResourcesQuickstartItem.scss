@@ -12,6 +12,10 @@
     display: flex;
     justify-content: space-between;
 
+    &-container {
+      display: flex;
+    }
+
     &-label {
       height: 18px;
       font-size: 12px;
