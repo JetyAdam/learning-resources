@@ -82,7 +82,7 @@ const GlobalLearningResourcesQuickstartItem: React.FC<
               <img
                 className="lr-c-global-learning-resources-quickstart__card--title-icon"
                 src="/apps/frontend-assets/console-landing/ansible.svg"
-                alt=""
+                alt="card icon"
               />
               <Stack hasGutter={false}>
                 <StackItem>
