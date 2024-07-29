@@ -72,7 +72,7 @@ const GlobalLearningResourcesQuickstartItem: React.FC<
   
   return (
     <GalleryItem key={quickStart.metadata.name}>
-      <Card className="lr-c-global-learning-resources-quickstart__card">
+      <Card className="lr-c-global-learning-resources-quickstart__card pf-v5-u-p-md">
         <TextContent>
           <CardTitle
             component="div"
