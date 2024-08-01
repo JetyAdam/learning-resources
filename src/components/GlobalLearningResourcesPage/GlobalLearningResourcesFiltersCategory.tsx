@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Checkbox, ExpandableSection, Stack, StackItem, Text, TextVariants } from '@patternfly/react-core';
+import { Checkbox, ExpandableSection, Stack, StackItem, Text, TextVariants, TextContent } from '@patternfly/react-core';
 
 interface SubCategory {
   group: string;
@@ -11,7 +11,7 @@ interface CategoryProps {
   categoryData: SubCategory[];
 }
 
-const GlobalLearningResourcesQuickstartItemCategory: React.FC<CategoryProps> = ({ categoryName, categoryData }) => {
+const GlobalLearningResourcesFiltersCategory: React.FC<CategoryProps> = ({ categoryName, categoryData }) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
   const onToggle = (_event: React.MouseEvent, isExpanded: boolean) => {
@@ -21,10 +21,11 @@ const GlobalLearningResourcesQuickstartItemCategory: React.FC<CategoryProps> = (
   return (
     <ExpandableSection toggleText={categoryName} onToggle={onToggle} isExpanded={isExpanded}>
       {categoryData.map((subCategory, index) => (
-        <Stack key={index} hasGutter>
+        <Stack component="div" className='pf-v5-u-mt-md' key={index}>
+          <TextContent>
           <Text component={TextVariants.small} className="pf-u-mb-0">{subCategory.group}</Text>
           {subCategory.data.map((item, itemIndex) => (
-            <StackItem key={itemIndex}>
+            <StackItem key={itemIndex} className='pf-v5-u-display-flex'>
               <Checkbox 
                 label={
                   <div className="lr-c-global-learning-resources-page__filters--checkbox">
@@ -40,10 +41,11 @@ const GlobalLearningResourcesQuickstartItemCategory: React.FC<CategoryProps> = (
               />
             </StackItem>
           ))}
+          </TextContent>
         </Stack>
       ))}
     </ExpandableSection>
   );
 };
 
-export default GlobalLearningResourcesQuickstartItemCategory;
+export default GlobalLearningResourcesFiltersCategory;
