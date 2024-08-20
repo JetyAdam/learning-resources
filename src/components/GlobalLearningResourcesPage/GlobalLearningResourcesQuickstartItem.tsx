@@ -6,25 +6,32 @@ import {
   CardBody,
   CardFooter,
   CardTitle,
+  Icon,
   Label,
   Text,
   TextContent,
   TextVariants,
 } from '@patternfly/react-core';
+import { TagIcon } from '@patternfly/react-icons';
 import { API_BASE, FAVORITES } from '../../hooks/useQuickStarts';
 import useChrome from '@redhat-cloud-services/frontend-components/useChrome';
 import axios from 'axios';
 import './GlobalLearningResourcesQuickstartItem.scss';
 import { BookmarkedIcon, OutlinedBookmarkedIcon } from '../common/BookmarkIcon';
+import { Filter } from '../../utils/filtersInterface';
 
 interface GlobalLearningResourcesQuickstartItemProps {
   quickStart: QuickStart;
   purgeCache: () => void;
+  quickStartTags: {
+    'product-families': Filter[];
+    'use-case': Filter[];
+  };
 }
 
 const GlobalLearningResourcesQuickstartItem: React.FC<
   GlobalLearningResourcesQuickstartItemProps
-> = ({ quickStart, purgeCache }) => {
+> = ({ quickStart, purgeCache, quickStartTags }) => {
   const chrome = useChrome();
   const [isBookmarked, setIsBookmarked] = useState(
     quickStart.metadata.favorite
@@ -88,7 +95,29 @@ const GlobalLearningResourcesQuickstartItem: React.FC<
           <Text component={TextVariants.p}>{quickStart.spec.description}</Text>
         </CardBody>
         <CardFooter className="lr-c-global-learning-resources-quickstart__card--footer">
-          <Text component={TextVariants.small}>Footer</Text>
+          <Text component={TextVariants.small}>
+            {quickStartTags['product-families'].map((item, index) => (
+              <span key={index}>
+                {item.cardLabel}
+                {index < quickStartTags['product-families'].length - 1
+                  ? ', '
+                  : undefined}
+              </span>
+            ))}
+          </Text>
+          <Text component={TextVariants.small}>
+            {quickStartTags['use-case'].length > 0 ? (
+              <Icon className="pf-v5-u-mr-sm">
+                <TagIcon />
+              </Icon>
+            ) : undefined}
+            {quickStartTags['use-case'].map((item, index) => (
+              <span key={index}>
+                {item.cardLabel}
+                {index < quickStartTags['use-case'].length - 1 ? ', ' : ''}
+              </span>
+            ))}
+          </Text>
         </CardFooter>
       </TextContent>
     </Card>

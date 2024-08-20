@@ -15,6 +15,11 @@ module.exports = {
    * Add additional webpack plugins
    */
   plugins: [],
+  routes: {
+    '/api/quickstarts/': {
+      host: 'http://localhost:8000/'
+    },
+  },
   moduleFederation: {
     exposes: {
       './RootApp': path.resolve(__dirname, './src/AppEntry.tsx'),
