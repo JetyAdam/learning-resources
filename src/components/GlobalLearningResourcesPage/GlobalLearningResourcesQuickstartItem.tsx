@@ -98,7 +98,7 @@ const GlobalLearningResourcesQuickstartItem: React.FC<
           <Text component={TextVariants.small}>
             {quickStartTags['product-families'].map((item, index) => (
               <span key={index}>
-                {item.cardLabel}
+                {item?.cardLabel}
                 {index < quickStartTags['product-families'].length - 1
                   ? ', '
                   : undefined}
@@ -113,7 +113,7 @@ const GlobalLearningResourcesQuickstartItem: React.FC<
             ) : undefined}
             {quickStartTags['use-case'].map((item, index) => (
               <span key={index}>
-                {item.cardLabel}
+                {item?.cardLabel}
                 {index < quickStartTags['use-case'].length - 1 ? ', ' : ''}
               </span>
             ))}

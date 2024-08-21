@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { GalleryItem, TabContent } from '@patternfly/react-core';
 import './GlobalLearningResourcesContent.scss';
 import { Bullseye, Gallery } from '@patternfly/react-core';
-import { QuickStart } from '@patternfly/quickstarts';
 import useChrome from '@redhat-cloud-services/frontend-components/useChrome';
 import {
   Button,
@@ -44,25 +43,14 @@ const findQuickstartFilterTags = (
   filterMap: FilterMap,
   QuickStart: ExtendedQuickstart
 ) => {
-  // const productFamiliesTags: Tag[] = QuickStart.metadata.tags.filter(
-  //   (tag: Tag) => tag.kind === 'product-families'
-  // );
-  // const productFamiliesTags = QuickStart.metadata.tags.reduce((acc, tag) => {
-  //   return {...acc,
-  //     filterMap[tag.kind][tag.value]
-  //   }
-  // }, {});
-
   const modifiedTags = QuickStart.metadata.tags.reduce<{
     'product-families': Filter[];
     'use-case': Filter[];
   }>(
     (acc, curr) => {
       const key = curr.kind;
-      // pokud curr.kind existuje v acc
       if (isValidTagType(key, acc)) {
         const newEntry = filterMap[curr.kind][curr.value];
-        // pushnout tag do spravne kategorie
         acc[key].push(newEntry);
       }
       return acc;
@@ -74,10 +62,6 @@ const findQuickstartFilterTags = (
   );
 
   return modifiedTags;
-
-  // return productFamiliesTags.map((tag: Tag) => {
-  //   return filterMap['product-families'][tag.value];
-  // });
 };
 
 const GalleryQuickstart: React.FC<GalleryQuickstartProps> = ({
@@ -91,10 +75,7 @@ const GalleryQuickstart: React.FC<GalleryQuickstartProps> = ({
       className="lr-c-global-learning-resources-page__content--gallery"
     >
       {quickStarts.map((quickStart) => {
-        const productFamiliesTags = findQuickstartFilterTags(
-          filterMap,
-          quickStart
-        );
+        const quickStartTags = findQuickstartFilterTags(filterMap, quickStart);
         return (
           <GalleryItem
             key={quickStart.metadata.name}
@@ -103,7 +84,7 @@ const GalleryQuickstart: React.FC<GalleryQuickstartProps> = ({
             <GlobalLearningResourcesQuickstartItem
               quickStart={quickStart}
               purgeCache={purgeCache}
-              quickStartTags={productFamiliesTags}
+              quickStartTags={quickStartTags}
               key={quickStart.metadata.name}
             />
           </GalleryItem>
@@ -196,35 +177,6 @@ const GlobalLearningResourcesContent: React.FC<
   }, []);
 
   const [filters, quickStarts] = loader(chrome.auth.getUser);
-  console.log(filters);
-  console.log(quickStarts);
-
-  // Create a hashmap for the filters
-  // const filterMap = new Map();
-
-  // filters sou nejaky pole => [{...}]
-
-  /**
-   * const filterMap = {
-   *  "product-families": {
-   *     ansible: {
-   *       id: 'ansible',
-   *       cardLabel: 'Ansible',
-   *       filterLabel: 'Ansible'
-   *     }
-   *   }
-   * }
-   */
-
-  /**
-   * Footer
-   * productFamilies = quickstart.metadata.tags.filters(({kind}) => kind === 'productFamilies') // ansible
-   *
-   *
-   * // iterovat pres productFamilies -> productFamily
-   * <Text>{filterMap['product-families'][productFamily].cardLabel}</Text>
-   */
-
   const filterMap: FilterMap = {};
 
   filters.data.categories.forEach((category) => {
