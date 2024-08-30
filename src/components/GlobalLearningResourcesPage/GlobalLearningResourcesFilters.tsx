@@ -13,30 +13,6 @@ import './GlobalLearningResourcesFilters.scss';
 import GlobalLearningResourcesFiltersCategory from './GlobalLearningResourcesFiltersCategory';
 import { FiltersCategory } from '../../utils/FiltersCategoryInterface';
 
-const data: FiltersCategory[] = [
-  {
-    categoryName: 'Product families',
-    categoryData: [
-      {
-        group: 'Platforms',
-        data: ['Ansible', 'OpenShift', 'RHEL (Red Hat Enterprise Linux)'],
-      },
-      {
-        group: 'SaaS services',
-        data: ['Quay.io'],
-      },
-      {
-        group: 'Console-wide services',
-        data: [
-          'IAM (Identity and Access Management)',
-          'Console settings',
-          'Subscription services',
-        ],
-      },
-    ],
-  },
-];
-
 export const GlobalLearningResourcesFilters = () => {
   const [inputValue, setInputValue] = useState('');
 
