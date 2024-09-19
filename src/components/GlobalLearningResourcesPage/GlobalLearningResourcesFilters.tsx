@@ -12,9 +12,25 @@ import { FilterIcon, SortAmountDownAltIcon } from '@patternfly/react-icons';
 import './GlobalLearningResourcesFilters.scss';
 import GlobalLearningResourcesFiltersCategory from './GlobalLearningResourcesFiltersCategory';
 import { FiltersCategory } from '../../utils/FiltersCategoryInterface';
+import { UnwrappedLoader } from '@redhat-cloud-services/frontend-components-utilities/useSuspenseLoader';
+import fetchAllData from '../../utils/fetchAllData';
+import useChrome from '@redhat-cloud-services/frontend-components/useChrome';
 
+<<<<<<< HEAD
 export const GlobalLearningResourcesFilters = () => {
+=======
+interface GlobalLearningResourcesFiltersProps {
+  loader: UnwrappedLoader<typeof fetchAllData>;
+}
+
+const GlobalLearningResourcesFilters: React.FC<
+  GlobalLearningResourcesFiltersProps
+> = ({ loader }) => {
+>>>>>>> 7037354 (Add missing tags and adjust fetching data from API)
   const [inputValue, setInputValue] = useState('');
+  const chrome = useChrome();
+
+  const [filters] = loader(chrome.auth.getUser);
 
   const handleInputChange = (
     _event: React.FormEvent<HTMLInputElement>,
@@ -47,14 +63,17 @@ export const GlobalLearningResourcesFilters = () => {
           </SplitItem>
         </Split>
       </StackItem>
-      {data.map((category: FiltersCategory, index: number) => (
-        <StackItem key={index}>
-          <GlobalLearningResourcesFiltersCategory
-            categoryName={category.categoryName}
-            categoryData={category.categoryData}
-          />
-        </StackItem>
-      ))}
+      {filters.data.categories.map(
+        (category: FiltersCategory, index: number) => (
+          <StackItem key={index}>
+            <GlobalLearningResourcesFiltersCategory
+              categoryId={category.categoryId}
+              categoryName={category.categoryName}
+              categoryData={category.categoryData}
+            />
+          </StackItem>
+        )
+      )}
     </Stack>
   );
 };
