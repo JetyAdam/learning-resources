@@ -9,6 +9,7 @@ import fetchAllData, { loaderOptionsDefault } from '../../utils/fetchAllData';
 import { FetchQuickstartsOptions } from '../../utils/fetchQuickstarts';
 import GlobalLearningResourcesFiltersFallback from './GlobalLearningResourcesFiltersFallback';
 import GlobalLearningResourcesContentFallback from './GlobalLearningResourcesContentFallback';
+import GlobalLearningResourcesFiltersMobile from './GlobalLearningResourcesFiltersMobile';
 
 export const GlobalLearningResourcesPage = () => {
   const { loader, purgeCache } = useSuspenseLoader(fetchAllData);
@@ -28,6 +29,11 @@ export const GlobalLearningResourcesPage = () => {
       </div>
       <div className="lr-c-global-learning-resources-page__main">
         <Suspense fallback={<GlobalLearningResourcesFiltersFallback />}>
+          <GlobalLearningResourcesFiltersMobile
+            loader={loader}
+            loaderOptions={loaderOptions}
+            setLoaderOptions={setLoaderOptions}
+          />
           <GlobalLearningResourcesFilters
             loader={loader}
             loaderOptions={loaderOptions}

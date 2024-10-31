@@ -20,7 +20,7 @@ import {
   loaderOptionsFalllback,
 } from '../../utils/fetchQuickstarts';
 
-interface GlobalLearningResourcesFiltersProps {
+export interface GlobalLearningResourcesFiltersProps {
   loader: UnwrappedLoader<typeof fetchAllData>;
   loaderOptions: FetchQuickstartsOptions;
   setLoaderOptions: (options: FetchQuickstartsOptions) => void;
@@ -46,7 +46,7 @@ const GlobalLearningResourcesFilters: React.FC<
   return (
     <Stack
       hasGutter
-      className="lr-c-global-learning-resources-page__filters pf-v5-u-p-lg"
+      className="lr-c-global-learning-resources-page__filters pf-v5-u-p-lg pf-v5-m-hide-on-sm"
     >
       <StackItem>
         <Split>
