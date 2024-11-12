@@ -23,49 +23,55 @@ import {
   loaderOptionsFalllback,
 } from '../../utils/fetchQuickstarts';
 import type { GlobalLearningResourcesFiltersProps } from './GlobalLearningResourcesFilters';
+import './GlobalLearningResourcesFiltersMobile.scss';
 
 const GlobalLearningResourcesFiltersMobile: React.FC<
   GlobalLearningResourcesFiltersProps
 > = ({ loader, loaderOptions, setLoaderOptions }) => {
-  const [isMainMenuOpen, setIsMainMenuOpen] = useState(false);
-  const [isSubMenuOpen, setIsSubMenuOpen] = useState<{
-    [itemId: string]: boolean;
-  }>({});
+  // const [isMainMenuOpen, setIsMainMenuOpen] = useState(false);
+  // const [isSubMenuOpen, setIsSubMenuOpen] = useState<{
+  //   [itemId: string]: boolean;
+  // }>({});
 
   const chrome = useChrome();
 
-  const [filters] = loader(chrome.auth.getUser);
+  //const [filters] = loader(chrome.auth.getUser);
 
-  const toggleMainMenu = () => {
-    setIsMainMenuOpen((prev) => !prev);
-  };
+  // const toggleMainMenu = () => {
+  //   setIsMainMenuOpen((prev) => !prev);
+  // };
 
-  const toggleSubMenu = (itemId: string) => {
-    setIsSubMenuOpen((prev) => ({
-      ...prev,
-      [itemId]: !prev[itemId],
-    }));
-  };
+  // const toggleSubMenu = (itemId: string) => {
+  //   setIsSubMenuOpen((prev) => ({
+  //     ...prev,
+  //     [itemId]: !prev[itemId],
+  //   }));
+  //};
 
-  const handleInputChange = (
-    _event: React.FormEvent<HTMLInputElement>,
-    value: string
-  ) => {
-    setLoaderOptions({
-      ...(loaderOptions || loaderOptionsFalllback),
-      'display-name': value,
-    });
-  };
+  // const handleInputChange = (
+  //   _event: React.FormEvent<HTMLInputElement>,
+  //   value: string
+  // ) => {
+  //   if (value !== loaderOptions['display-name']) {
+  //     setLoaderOptions({
+  //       ...(loaderOptions || loaderOptionsFalllback),
+  //       'display-name': value,
+  //     });
+  //   }
+  // };
 
   return (
-    <Flex className="pf-v5-m-visible-on-sm pf-v5-m-hide-on-md">
-      <FlexItem>
+    <div
+      className="lr-c-global-learning-resources-page__filters-mobile pf-v5-u-p-md"
+      // display={{ default: 'inlineFlex' }}
+    >
+      <FlexItem className="lr-c-global-learning-resources-page__filters-mobile--input">
         <TextInputGroup>
           <TextInputGroupMain
             icon={<FilterIcon />}
             value={loaderOptions['display-name']}
             placeholder="Find by name ..."
-            onChange={handleInputChange}
+            //onChange={console.log("change")}
           />
         </TextInputGroup>
       </FlexItem>
@@ -84,7 +90,7 @@ const GlobalLearningResourcesFiltersMobile: React.FC<
           </TextContent>
         </Button>
       </FlexItem>
-    </Flex>
+    </div>
   );
 };
 

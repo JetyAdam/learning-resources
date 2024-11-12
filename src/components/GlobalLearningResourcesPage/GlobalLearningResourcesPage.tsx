@@ -28,18 +28,20 @@ export const GlobalLearningResourcesPage = () => {
         </Suspense>
       </div>
       <div className="lr-c-global-learning-resources-page__main">
-        <Suspense fallback={<GlobalLearningResourcesFiltersFallback />}>
+        <div>
+          <Suspense fallback={<GlobalLearningResourcesFiltersFallback />}>
+            <GlobalLearningResourcesFilters
+              loader={loader}
+              loaderOptions={loaderOptions}
+              setLoaderOptions={setLoaderOptions}
+            />
+          </Suspense>
           <GlobalLearningResourcesFiltersMobile
             loader={loader}
             loaderOptions={loaderOptions}
             setLoaderOptions={setLoaderOptions}
           />
-          <GlobalLearningResourcesFilters
-            loader={loader}
-            loaderOptions={loaderOptions}
-            setLoaderOptions={setLoaderOptions}
-          />
-        </Suspense>
+        </div>
         <Suspense fallback={<GlobalLearningResourcesContentFallback />}>
           <GlobalLearningResourcesContent
             loader={loader}

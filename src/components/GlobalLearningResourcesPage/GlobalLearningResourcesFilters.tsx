@@ -46,7 +46,7 @@ const GlobalLearningResourcesFilters: React.FC<
   return (
     <Stack
       hasGutter
-      className="lr-c-global-learning-resources-page__filters pf-v5-u-p-lg pf-v5-m-hide-on-sm"
+      className="lr-c-global-learning-resources-page__filters pf-v5-u-p-lg pf-m-hidden-on-sm"
     >
       <StackItem>
         <Split>

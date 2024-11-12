@@ -1,0 +1,14 @@
+.lr-c-global-learning-resources-page__filters-mobile {
+  display: none;
+  background-color: var(--pf-v5-global--BackgroundColor--100);
+
+  &--input {
+    width: 50%;
+  }
+}
+
+@media only screen and (max-width: 550px) {
+  .lr-c-global-learning-resources-page__filters-mobile {
+    display: flex;
+  }
+}
