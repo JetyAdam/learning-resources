@@ -23,6 +23,7 @@ export type FetchQuickstartsOptions = {
   content?: string[];
   'use-case'?: string[];
   'display-name'?: string;
+  // 'alphabetical-sort'?: boolean;
 };
 
 export const loaderOptionsFalllback: FetchQuickstartsOptions = {
@@ -30,6 +31,7 @@ export const loaderOptionsFalllback: FetchQuickstartsOptions = {
   content: [],
   'use-case': [],
   'display-name': '',
+  // 'alphabetical-sort': false,
 };
 
 async function fetchQuickstarts(

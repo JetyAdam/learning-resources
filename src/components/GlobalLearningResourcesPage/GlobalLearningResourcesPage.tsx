@@ -36,11 +36,13 @@ export const GlobalLearningResourcesPage = () => {
               setLoaderOptions={setLoaderOptions}
             />
           </Suspense>
-          <GlobalLearningResourcesFiltersMobile
-            loader={loader}
-            loaderOptions={loaderOptions}
-            setLoaderOptions={setLoaderOptions}
-          />
+          <Suspense fallback={<GlobalLearningResourcesFiltersFallback />}>
+            <GlobalLearningResourcesFiltersMobile
+              loader={loader}
+              loaderOptions={loaderOptions}
+              setLoaderOptions={setLoaderOptions}
+            />
+          </Suspense>
         </div>
         <Suspense fallback={<GlobalLearningResourcesContentFallback />}>
           <GlobalLearningResourcesContent

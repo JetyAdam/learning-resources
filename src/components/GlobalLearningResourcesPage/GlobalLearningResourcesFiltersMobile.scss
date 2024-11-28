@@ -3,12 +3,42 @@
   background-color: var(--pf-v5-global--BackgroundColor--100);
 
   &--input {
-    width: 50%;
+    flex-grow: 1;
+    width: 60%;
   }
 }
 
 @media only screen and (max-width: 550px) {
   .lr-c-global-learning-resources-page__filters-mobile {
     display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    &--input {
+      margin-right: var(--pf-v5-global--spacer--sm);
+    }
   }
 }
+
+@media only screen and (max-width: 360px) {
+  .lr-c-global-learning-resources-page__filters-mobile {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+
+    &--icon, &--button {
+      margin-right: var(--pf-v5-global--spacer--md);
+    }
+
+    &--input {
+      width: 100%; 
+      flex-grow: 1;
+      margin-bottom: var(--pf-v5-global--spacer--sm);
+    }
+  }
+}
+
+
+
+
