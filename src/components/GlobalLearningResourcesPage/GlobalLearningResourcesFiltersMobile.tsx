@@ -15,15 +15,8 @@ import {
 } from '@patternfly/react-core';
 import { FilterIcon, SortAmountDownAltIcon } from '@patternfly/react-icons';
 import './GlobalLearningResourcesFilters.scss';
-import GlobalLearningResourcesFiltersCategory from './GlobalLearningResourcesFiltersCategory';
-import { FiltersCategory } from '../../utils/FiltersCategoryInterface';
-import { UnwrappedLoader } from '@redhat-cloud-services/frontend-components-utilities/useSuspenseLoader';
-import fetchAllData from '../../utils/fetchAllData';
 import useChrome from '@redhat-cloud-services/frontend-components/useChrome';
-import {
-  FetchQuickstartsOptions,
-  loaderOptionsFalllback,
-} from '../../utils/fetchQuickstarts';
+import { loaderOptionsFalllback } from '../../utils/fetchQuickstarts';
 import type { GlobalLearningResourcesFiltersProps } from './GlobalLearningResourcesFilters';
 import './GlobalLearningResourcesFiltersMobile.scss';
 
@@ -33,6 +26,7 @@ const GlobalLearningResourcesFiltersMobile: React.FC<
   const chrome = useChrome();
 
   const [filters] = loader(chrome.auth.getUser);
+  console.log(filters);
 
   const [isMainMenuOpen, setIsMainMenuOpen] = useState(false);
   const [isSubMenuOpen, setIsSubMenuOpen] = useState<string | null>(null);
@@ -100,28 +94,32 @@ const GlobalLearningResourcesFiltersMobile: React.FC<
                         key={index}
                         onClick={() => {
                           if (hasNestedData) {
-                            toggleSubMenu(group.group || '');
+                            toggleSubMenu(
+                              group.group || category.categoryName || ''
+                            );
                           }
                         }}
                       >
                         {/* Show group name or category name */}
                         {group.group || category.categoryName}
-
                         {/* Render submenu if applicable */}
-                        {isSubMenuOpen === group.group && hasNestedData && (
-                          <Menu>
-                            <MenuContent>
-                              <MenuList>
-                                {group.data.map((item) => (
-                                  <MenuItem key={item.id}>
-                                    {item.cardLabel}
-                                  </MenuItem>
-                                ))}
-                              </MenuList>
-                            </MenuContent>
-                          </Menu>
-                        )}
-
+                        {/* FIXME */}
+                        {(isSubMenuOpen === group.group ||
+                          isSubMenuOpen === category.categoryName) &&
+                          hasNestedData && (
+                            <Menu>
+                              <MenuContent>
+                                <MenuList>
+                                  {/* FIXME */}
+                                  {group.data.map((item) => (
+                                    <MenuItem key={item.id}>
+                                      {item.cardLabel}
+                                    </MenuItem>
+                                  ))}
+                                </MenuList>
+                              </MenuContent>
+                            </Menu>
+                          )}
                         {/* Handle direct data items for categories like "Content type" */}
                         {!hasNestedData &&
                           group.data.map((item) => (
