@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import {
   Button,
+  Divider,
+  DrilldownMenu,
   Menu,
   MenuContent,
-  MenuGroup,
   MenuItem,
   MenuList,
   MenuToggle,
@@ -15,30 +16,38 @@ import {
 } from '@patternfly/react-core';
 import { FilterIcon, SortAmountDownAltIcon } from '@patternfly/react-icons';
 import './GlobalLearningResourcesFilters.scss';
+import './GlobalLearningResourcesFiltersMobile.scss';
 import useChrome from '@redhat-cloud-services/frontend-components/useChrome';
 import { loaderOptionsFalllback } from '../../utils/fetchQuickstarts';
 import type { GlobalLearningResourcesFiltersProps } from './GlobalLearningResourcesFilters';
-import './GlobalLearningResourcesFiltersMobile.scss';
 
 const GlobalLearningResourcesFiltersMobile: React.FC<
   GlobalLearningResourcesFiltersProps
 > = ({ loader, loaderOptions, setLoaderOptions }) => {
   const chrome = useChrome();
-
   const [filters] = loader(chrome.auth.getUser);
   console.log(filters);
+  console.log(
+    `This is filters.data.categories: ${JSON.stringify(
+      filters.data.categories
+    )}`
+  );
 
-  const [isMainMenuOpen, setIsMainMenuOpen] = useState(false);
-  const [isSubMenuOpen, setIsSubMenuOpen] = useState<string | null>(null);
+  const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const [menuDrilledIn, setMenuDrilledIn] = useState<string[]>([]);
+  const [drilldownPath, setDrilldownPath] = useState<string[]>([]);
+  const [menuHeights, setMenuHeights] = useState<any>({});
 
   const toggleMainMenu = () => {
-    setIsMainMenuOpen((prev) => !prev);
+    if (activeMenu === null) {
+      // Reset to the main menu when reopening
+      setActiveMenu('rootMenu');
+      setMenuDrilledIn([]);
+      setDrilldownPath([]);
+    } else {
+      setActiveMenu(null); // Close the menu
+    }
   };
-
-  const toggleSubMenu = (categoryId: string) => {
-    setIsSubMenuOpen((prev) => (prev === categoryId ? null : categoryId));
-  };
-  // TODO zprovoznit ten INPUT a to menu pri ikliknuti na filter iconu
 
   const handleInputChange = (
     _event: React.FormEvent<HTMLInputElement>,
@@ -49,6 +58,32 @@ const GlobalLearningResourcesFiltersMobile: React.FC<
         ...(loaderOptions || loaderOptionsFalllback),
         'display-name': value,
       });
+    }
+  };
+
+  const drillIn = (
+    _event: React.KeyboardEvent | React.MouseEvent,
+    fromMenuId: string,
+    toMenuId: string,
+    pathId: string
+  ) => {
+    setMenuDrilledIn([...menuDrilledIn, fromMenuId]);
+    setDrilldownPath([...drilldownPath, pathId]);
+    setActiveMenu(toMenuId);
+  };
+
+  const drillOut = (
+    _event: React.KeyboardEvent | React.MouseEvent,
+    toMenuId: string
+  ) => {
+    setMenuDrilledIn(menuDrilledIn.slice(0, -1));
+    setDrilldownPath(drilldownPath.slice(0, -1));
+    setActiveMenu(toMenuId);
+  };
+
+  const setHeight = (menuId: string, height: number) => {
+    if (!menuHeights[menuId] || menuHeights[menuId] !== height) {
+      setMenuHeights({ ...menuHeights, [menuId]: height });
     }
   };
 
@@ -68,69 +103,106 @@ const GlobalLearningResourcesFiltersMobile: React.FC<
         <MenuToggle
           variant="plain"
           onClick={toggleMainMenu}
-          isExpanded={isMainMenuOpen}
-          aria-expanded={isMainMenuOpen}
+          isExpanded={activeMenu !== null}
+          aria-expanded={activeMenu !== null}
           aria-label="Filter menu toggle"
         >
           <FilterIcon />
         </MenuToggle>
       </div>
 
-      {isMainMenuOpen && (
-        <Menu>
-          <MenuContent>
-            {filters.data.categories.map((category) => (
-              <MenuGroup
-                key={category.categoryId}
-                label={category.categoryName}
-              >
-                <MenuList>
-                  {category.categoryData.map((group, index) => {
-                    // Check if this group has nested data
-                    const hasNestedData = Array.isArray(group.data);
-
-                    return (
+      {activeMenu && (
+        <Menu
+          id="rootMenu"
+          containsDrilldown
+          drilldownItemPath={drilldownPath}
+          drilledInMenus={menuDrilledIn}
+          activeMenu={activeMenu}
+          onDrillIn={drillIn}
+          onDrillOut={drillOut}
+          onGetMenuHeight={setHeight}
+        >
+          <MenuContent menuHeight={`${menuHeights[activeMenu] || 216}px`}>
+            <MenuList>
+              {filters.data.categories.map((category) => (
+                <MenuItem
+                  key={category.categoryId}
+                  itemId={`category:${category.categoryId}`}
+                  direction="down"
+                  drilldownMenu={
+                    <DrilldownMenu id={`menu-${category.categoryId}`}>
                       <MenuItem
-                        key={index}
-                        onClick={() => {
-                          if (hasNestedData) {
-                            toggleSubMenu(
-                              group.group || category.categoryName || ''
-                            );
-                          }
-                        }}
+                        itemId={`category:${category.categoryId}_breadcrumb`}
+                        direction="up"
                       >
-                        {/* Show group name or category name */}
-                        {group.group || category.categoryName}
-                        {/* Render submenu if applicable */}
-                        {/* FIXME */}
-                        {(isSubMenuOpen === group.group ||
-                          isSubMenuOpen === category.categoryName) &&
-                          hasNestedData && (
-                            <Menu>
-                              <MenuContent>
-                                <MenuList>
-                                  {/* FIXME */}
-                                  {group.data.map((item) => (
-                                    <MenuItem key={item.id}>
-                                      {item.cardLabel}
-                                    </MenuItem>
-                                  ))}
-                                </MenuList>
-                              </MenuContent>
-                            </Menu>
-                          )}
-                        {/* Handle direct data items for categories like "Content type" */}
-                        {!hasNestedData &&
-                          group.data.map((item) => (
-                            <MenuItem key={item.id}>{item.cardLabel}</MenuItem>
-                          ))}
+                        {/* Product families/Content type/Use case */}
+                        {category.categoryName}
                       </MenuItem>
-                    );
-                  })}
-                </MenuList>
-              </MenuGroup>
-            ))}
+                      <Divider component="li" />
+                      {category.categoryData.map((group, index) => {
+                        const hasGroup = !!group.group;
+
+                        // Directly render the submenu items if there’s no group and data exists
+                        if (!hasGroup && Array.isArray(group.data)) {
+                          return group.data.map((item) => (
+                            <MenuItem
+                              key={item.id}
+                              itemId={`item:${category.categoryId}-${item.id}`}
+                            >
+                              {item.cardLabel}
+                            </MenuItem>
+                          ));
+                        }
+
+                        // Render the standard drilldown logic for grouped items
+                        return (
+                          <MenuItem
+                            key={index}
+                            itemId={`group:${category.categoryId}-${group.group}`}
+                            direction={
+                              Array.isArray(group.data) ? 'down' : undefined
+                            }
+                            drilldownMenu={
+                              Array.isArray(group.data) && (
+                                <DrilldownMenu
+                                  id={`menu-group-${category.categoryId}-${group.group}`}
+                                >
+                                  <MenuItem
+                                    itemId={`group:${category.categoryId}-${group.group}_breadcrumb`}
+                                    direction="up"
+                                  >
+                                    {group.group || 'Unnamed group'}
+                                  </MenuItem>
+                                  <Divider component="li" />
+                                  {group.data.length > 0 ? (
+                                    group.data.map((item) => (
+                                      <MenuItem
+                                        key={item.id}
+                                        itemId={`item:${category.categoryId}-${item.id}`}
+                                      >
+                                        {item.cardLabel}
+                                      </MenuItem>
+                                    ))
+                                  ) : (
+                                    <MenuItem key="no-data">
+                                      No items available
+                                    </MenuItem>
+                                  )}
+                                </DrilldownMenu>
+                              )
+                            }
+                          >
+                            {group.group || 'Unnamed group'}
+                          </MenuItem>
+                        );
+                      })}
+                    </DrilldownMenu>
+                  }
+                >
+                  {category.categoryName}
+                </MenuItem>
+              ))}
+            </MenuList>
           </MenuContent>
         </Menu>
       )}
