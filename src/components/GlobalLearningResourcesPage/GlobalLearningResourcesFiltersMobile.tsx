@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   Button,
+  Checkbox,
   Divider,
   DrilldownMenu,
   Menu,
@@ -26,17 +27,13 @@ const GlobalLearningResourcesFiltersMobile: React.FC<
 > = ({ loader, loaderOptions, setLoaderOptions }) => {
   const chrome = useChrome();
   const [filters] = loader(chrome.auth.getUser);
-  console.log(filters);
-  console.log(
-    `This is filters.data.categories: ${JSON.stringify(
-      filters.data.categories
-    )}`
-  );
-
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [menuDrilledIn, setMenuDrilledIn] = useState<string[]>([]);
   const [drilldownPath, setDrilldownPath] = useState<string[]>([]);
-  const [menuHeights, setMenuHeights] = useState<any>({});
+
+  const [menuHeights, setMenuHeights] = React.useState<any>({
+    rootMenu: 140,
+  });
 
   const toggleMainMenu = () => {
     if (activeMenu === null) {
@@ -82,145 +79,170 @@ const GlobalLearningResourcesFiltersMobile: React.FC<
   };
 
   const setHeight = (menuId: string, height: number) => {
-    if (!menuHeights[menuId] || menuHeights[menuId] !== height) {
+    console.log({ menuId, height });
+    if (
+      menuHeights[menuId] === undefined ||
+      (menuId !== 'rootMenu' && menuHeights[menuId] !== height)
+    ) {
       setMenuHeights({ ...menuHeights, [menuId]: height });
     }
   };
 
   return (
     <div className="lr-c-global-learning-resources-page__filters-mobile pf-v5-u-p-md">
-      <div className="lr-c-global-learning-resources-page__filters-mobile--input">
-        <TextInputGroup>
-          <TextInputGroupMain
-            icon={<FilterIcon />}
-            value={loaderOptions['display-name']}
-            placeholder="Find by name ..."
-            onChange={handleInputChange}
-          />
-        </TextInputGroup>
-      </div>
-      <div className="lr-c-global-learning-resources-page__filters-mobile--icon">
-        <MenuToggle
-          variant="plain"
-          onClick={toggleMainMenu}
-          isExpanded={activeMenu !== null}
-          aria-expanded={activeMenu !== null}
-          aria-label="Filter menu toggle"
-        >
-          <FilterIcon />
-        </MenuToggle>
-      </div>
+      <div className="lr-c-global-learning-resources-page__filters-container">
+        {/* Input Row, MenuToggle, and Buttons */}
+        <div className="lr-c-global-learning-resources-page__filters-row">
+          <TextInputGroup className="lr-c-global-learning-resources-page__filters-input">
+            <TextInputGroupMain
+              icon={<FilterIcon />}
+              value={loaderOptions['display-name']}
+              placeholder="Find by name ..."
+              onChange={handleInputChange}
+            />
+          </TextInputGroup>
+          <MenuToggle
+            variant="plain"
+            onClick={toggleMainMenu}
+            isExpanded={activeMenu !== null}
+            aria-expanded={activeMenu !== null}
+            aria-label="Filter menu toggle"
+          >
+            <FilterIcon />
+          </MenuToggle>
+          <Button variant="plain" className="pf-v5-u-pl-0">
+            <SortAmountDownAltIcon />
+          </Button>
+          <Button
+            variant="plain"
+            className="lr-c-global-learning-resources-page__filters-clear"
+          >
+            <TextContent className="lr-c-global-learning-resources-page__filters-text">
+              <Text component={TextVariants.small}>Clear Filters</Text>
+            </TextContent>
+          </Button>
+        </div>
 
-      {activeMenu && (
-        <Menu
-          id="rootMenu"
-          containsDrilldown
-          drilldownItemPath={drilldownPath}
-          drilledInMenus={menuDrilledIn}
-          activeMenu={activeMenu}
-          onDrillIn={drillIn}
-          onDrillOut={drillOut}
-          onGetMenuHeight={setHeight}
-        >
-          <MenuContent menuHeight={`${menuHeights[activeMenu] || 216}px`}>
-            <MenuList>
-              {filters.data.categories.map((category) => (
-                <MenuItem
-                  key={category.categoryId}
-                  itemId={`category:${category.categoryId}`}
-                  direction="down"
-                  drilldownMenu={
-                    <DrilldownMenu id={`menu-${category.categoryId}`}>
-                      <MenuItem
-                        itemId={`category:${category.categoryId}_breadcrumb`}
-                        direction="up"
-                      >
-                        {/* Product families/Content type/Use case */}
-                        {category.categoryName}
-                      </MenuItem>
-                      <Divider component="li" />
-                      {category.categoryData.map((group, index) => {
-                        const hasGroup = !!group.group;
-
-                        // Directly render the submenu items if there’s no group and data exists
-                        if (!hasGroup && Array.isArray(group.data)) {
-                          return group.data.map((item) => (
-                            <MenuItem
-                              key={item.id}
-                              itemId={`item:${category.categoryId}-${item.id}`}
-                            >
-                              {item.cardLabel}
-                            </MenuItem>
-                          ));
-                        }
-
-                        // Render the standard drilldown logic for grouped items
-                        return (
+        {/* Menu */}
+        {activeMenu && (
+          <div className="lr-c-global-learning-resources-page__menu-container">
+            <Menu
+              id="rootMenu"
+              // key={`root-menu-${activeMenu}`}
+              containsDrilldown
+              drilldownItemPath={drilldownPath}
+              drilledInMenus={menuDrilledIn}
+              activeMenu={activeMenu}
+              onDrillIn={drillIn}
+              onDrillOut={drillOut}
+              onGetMenuHeight={setHeight}
+              className="lr-c-global-learning-resources-page__menu"
+            >
+              <MenuContent menuHeight={`${menuHeights[activeMenu]}px`}>
+                <MenuList>
+                  {filters.data.categories.map((category) => (
+                    <MenuItem
+                      key={category.categoryId}
+                      itemId={`category:${category.categoryId}`}
+                      direction="down"
+                      drilldownMenu={
+                        <DrilldownMenu id={`menu-${category.categoryId}`}>
                           <MenuItem
-                            key={index}
-                            itemId={`group:${category.categoryId}-${group.group}`}
-                            direction={
-                              Array.isArray(group.data) ? 'down' : undefined
-                            }
-                            drilldownMenu={
-                              Array.isArray(group.data) && (
-                                <DrilldownMenu
-                                  id={`menu-group-${category.categoryId}-${group.group}`}
-                                >
-                                  <MenuItem
-                                    itemId={`group:${category.categoryId}-${group.group}_breadcrumb`}
-                                    direction="up"
-                                  >
-                                    {group.group || 'Unnamed group'}
-                                  </MenuItem>
-                                  <Divider component="li" />
-                                  {group.data.length > 0 ? (
-                                    group.data.map((item) => (
-                                      <MenuItem
-                                        key={item.id}
-                                        itemId={`item:${category.categoryId}-${item.id}`}
-                                      >
-                                        {item.cardLabel}
-                                      </MenuItem>
-                                    ))
-                                  ) : (
-                                    <MenuItem key="no-data">
-                                      No items available
-                                    </MenuItem>
-                                  )}
-                                </DrilldownMenu>
-                              )
-                            }
+                            itemId={`category:${category.categoryId}_breadcrumb`}
+                            direction="up"
                           >
-                            {group.group || 'Unnamed group'}
+                            {category.categoryName}
                           </MenuItem>
-                        );
-                      })}
-                    </DrilldownMenu>
-                  }
-                >
-                  {category.categoryName}
-                </MenuItem>
-              ))}
-            </MenuList>
-          </MenuContent>
-        </Menu>
-      )}
+                          <Divider component="li" />
+                          {category.categoryData.map((group, index) => {
+                            const hasGroup = !!group.group;
 
-      <div className="lr-c-global-learning-resources-page__filters-mobile--button">
-        <Button variant="plain" className="pf-v5-u-pl-0">
-          <SortAmountDownAltIcon />
-        </Button>
-      </div>
-      <div className="lr-c-global-learning-resources-page__filters-mobile--clear">
-        <Button
-          variant="plain"
-          className="lr-c-global-learning-resources-page__filters-mobile pf-v5-u-pl-0"
-        >
-          <TextContent className="lr-c-global-learning-resources-page__filters-mobile--text">
-            <Text component={TextVariants.small}>Clear Filters</Text>
-          </TextContent>
-        </Button>
+                            // Handle cases without groups (e.g., "Content type", "Use case")
+                            if (!hasGroup && Array.isArray(group.data)) {
+                              return group.data.map((item) => (
+                                <MenuItem
+                                  key={item.id}
+                                  itemId={`item:${category.categoryId}-${item.id}`}
+                                >
+                                  {item.cardLabel}
+                                </MenuItem>
+                              ));
+                            }
+
+                            // Handle grouped cases (e.g., "Product families")
+                            return (
+                              <MenuItem
+                                key={index}
+                                itemId={`group:${category.categoryId}-${group.group}`}
+                                direction={
+                                  Array.isArray(group.data) ? 'down' : undefined
+                                }
+                                drilldownMenu={
+                                  Array.isArray(group.data) && (
+                                    <DrilldownMenu
+                                      id={`menu-group-${category.categoryId}-${group.group}`}
+                                    >
+                                      <MenuItem
+                                        itemId={`group:${category.categoryId}-${group.group}_breadcrumb`}
+                                        direction="up"
+                                      >
+                                        {group.group || 'Unnamed group'}
+                                      </MenuItem>
+                                      <Divider component="li" />
+                                      {group.data.map((item) => (
+                                        <MenuItem
+                                          key={item.id}
+                                          itemId={`item:${category.categoryId}-${item.id}`}
+                                        >
+                                          <Checkbox
+                                            label={
+                                              <div className="lr-c-global-learning-resources-page__filters--checkbox">
+                                                <div className="lr-c-global-learning-resources-page__filters--checkbox-wrapper">
+                                                  {item.icon ? (
+                                                    <img
+                                                      className="lr-c-global-learning-resources-page__filters--checkbox-icon pf-v5-u-mr-sm"
+                                                      src={item.icon}
+                                                      alt={item.filterLabel}
+                                                    />
+                                                  ) : null}
+                                                  <span className="lr-c-global-learning-resources-page__filters--checkbox-text">
+                                                    {item.filterLabel}
+                                                  </span>
+                                                </div>
+                                              </div>
+                                            }
+                                            id={item.id}
+                                            isChecked={isFilterChecked(item.id)}
+                                            onChange={(
+                                              event: React.FormEvent<HTMLInputElement>
+                                            ) =>
+                                              updateLoaderOptions(
+                                                item,
+                                                event.currentTarget.checked
+                                              )
+                                            }
+                                          />
+                                        </MenuItem>
+                                      ))}
+                                    </DrilldownMenu>
+                                  )
+                                }
+                              >
+                                {group.group || 'Unnamed group'}
+                              </MenuItem>
+                            );
+                          })}
+                        </DrilldownMenu>
+                      }
+                    >
+                      {category.categoryName}
+                    </MenuItem>
+                  ))}
+                </MenuList>
+              </MenuContent>
+            </Menu>
+          </div>
+        )}
       </div>
     </div>
   );

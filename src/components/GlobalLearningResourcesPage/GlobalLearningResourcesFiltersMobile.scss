@@ -8,6 +8,42 @@
   }
 }
 
+.lr-c-global-learning-resources-page__filters-container {
+  position: relative;
+}
+
+.lr-c-global-learning-resources-page__filters-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap; /* Ensure elements remain in one row */
+}
+
+.lr-c-global-learning-resources-page__filters-input {
+  flex-grow: 1; /* Allow the input to expand and take up available space */
+}
+
+.lr-c-global-learning-resources-page__menu-container {
+  position: absolute;
+  top: calc(100% + 8px); /* Position below input and buttons */
+  left: 10%; 
+  width: 80vw; 
+  z-index: 1000;
+  background: white;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 4px; 
+  overflow: hidden; 
+}
+
+.lr-c-global-learning-resources-page__menu .pf-c-menu__list {
+  padding: 0; 
+}
+
+.lr-c-global-learning-resources-page__menu .pf-c-menu__item {
+  padding: 8px 12px; 
+  font-size: 14px; 
+}
+
 @media only screen and (max-width: 550px) {
   .lr-c-global-learning-resources-page__filters-mobile {
     display: flex;
