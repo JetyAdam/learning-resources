@@ -63,18 +63,16 @@ const GlobalLearningResourcesFiltersCategory: React.FC<FiltersCategory> = ({
                 <Checkbox
                   label={
                     <div className="lr-c-global-learning-resources-page__filters--checkbox">
-                      <div className="lr-c-global-learning-resources-page__filters--checkbox-wrapper">
-                        {item.icon ? (
-                          <img
-                            className="lr-c-global-learning-resources-page__filters--checkbox-icon pf-v5-u-mr-sm"
-                            src={item.icon}
-                            alt={item.filterLabel}
-                          />
-                        ) : null}
-                        <span className="lr-c-global-learning-resources-page__filters--checkbox-text">
-                          {item.filterLabel}
-                        </span>
-                      </div>
+                      {item.icon ? (
+                        <img
+                          className="lr-c-global-learning-resources-page__filters--checkbox-icon pf-v5-u-mr-sm"
+                          src={item.icon}
+                          alt={item.filterLabel}
+                        />
+                      ) : null}
+                      <span className="lr-c-global-learning-resources-page__filters--checkbox-text">
+                        {item.filterLabel}
+                      </span>
                     </div>
                   }
                   id={item.id}

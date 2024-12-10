@@ -26,31 +26,6 @@
   }
 }
 
-// BUG - align icon with the title when the title is split into two lines, the icon is mistakenly centered between the two lines
-// @media only screen and (max-width: 360px) {
-//   .lr-c-global-learning-resources-page__filters {
-//     &--checkbox {
-//       display: flex;
-//       align-items: center;
-//       flex-wrap: nowrap;
-
-//       &-wrapper {
-//         display: flex;
-//         align-items: center;
-//       }
-
-//       &-text {
-//         display: inline-block;
-//         overflow-wrap: break-word;
-//       }
-
-//       &-icon {
-//         flex-shrink: 0;
-//       }
-//     }
-//   }
-// }
-
 @media only screen and (max-width: 550px) {
   .lr-c-global-learning-resources-page__filters {
     display: none;
