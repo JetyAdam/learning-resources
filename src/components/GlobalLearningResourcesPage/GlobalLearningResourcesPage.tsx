@@ -16,7 +16,7 @@ export const GlobalLearningResourcesPage = () => {
   const { loader, purgeCache } = useSuspenseLoader(fetchAllData);
   const [loaderOptions, setLoaderOptions] =
     useState<FetchQuickstartsOptions>(loaderOptionsDefault);
-  const [sortOrder, setSortOrder] = useState<SortOrder>(null);
+  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
 
   return (
     <div className="lr-c-global-learning-resources-page">
@@ -36,6 +36,7 @@ export const GlobalLearningResourcesPage = () => {
               loader={loader}
               loaderOptions={loaderOptions}
               setLoaderOptions={setLoaderOptions}
+              sortOrder={sortOrder}
               setSortOrder={setSortOrder}
             />
           </Suspense>

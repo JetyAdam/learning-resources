@@ -13,7 +13,11 @@ import {
   TextInputGroupMain,
   TextVariants,
 } from '@patternfly/react-core';
-import { FilterIcon, SortAmountDownAltIcon } from '@patternfly/react-icons';
+import {
+  FilterIcon,
+  LongArrowAltDownIcon,
+  LongArrowAltUpIcon,
+} from '@patternfly/react-icons';
 import './GlobalLearningResourcesFilters.scss';
 import GlobalLearningResourcesFiltersCategory from './GlobalLearningResourcesFiltersCategory';
 import { FiltersCategory } from '../../utils/FiltersCategoryInterface';
@@ -26,18 +30,19 @@ import {
 } from '../../utils/fetchQuickstarts';
 import { SortOrder } from '../../utils/filtersInterface';
 
-export interface GlobalLearningResourcesFiltersProps {
+interface GlobalLearningResourcesFiltersProps {
   loader: UnwrappedLoader<typeof fetchAllData>;
   loaderOptions: FetchQuickstartsOptions;
   setLoaderOptions: React.Dispatch<
     React.SetStateAction<FetchQuickstartsOptions>
   >;
+  sortOrder: SortOrder;
   setSortOrder: React.Dispatch<React.SetStateAction<SortOrder>>;
 }
 
 const GlobalLearningResourcesFilters: React.FC<
   GlobalLearningResourcesFiltersProps
-> = ({ loader, loaderOptions, setLoaderOptions, setSortOrder }) => {
+> = ({ loader, loaderOptions, setLoaderOptions, sortOrder, setSortOrder }) => {
   const chrome = useChrome();
 
   const [filters] = loader(chrome.auth.getUser);
@@ -76,11 +81,15 @@ const GlobalLearningResourcesFilters: React.FC<
               variant="plain"
               onClick={() =>
                 setSortOrder((prev: SortOrder) =>
-                  prev === 'asc' ? 'desc' : prev === 'desc' ? null : 'asc'
+                  prev === 'asc' ? 'desc' : 'asc'
                 )
               }
             >
-              <SortAmountDownAltIcon />
+              {sortOrder === 'asc' ? (
+                <LongArrowAltUpIcon />
+              ) : (
+                <LongArrowAltDownIcon />
+              )}
             </Button>
           </SplitItem>
         </Split>
